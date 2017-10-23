@@ -1,20 +1,26 @@
 package demo
 
-import java.nio.ByteOrder
+import java.nio.{ ByteBuffer, ByteOrder }
 import java.nio.charset.StandardCharsets
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.MediaType.NotCompressible
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.{ActorMaterializer, Materializer}
+import akka.stream.{ ActorMaterializer, Materializer }
 import akka.util.ByteString
 import de.envisia.services.IPPClient
 
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.concurrent.duration._
 
 object Main {
+
+  def fromBuffer(buf: ByteBuffer, length: Int): Array[Byte] = {
+    val bytes = new Array[Byte](length)
+    buf.get(bytes, 0, length)
+    bytes
+  }
 
   implicit val bO: ByteOrder = ByteOrder.BIG_ENDIAN
 
@@ -87,33 +93,33 @@ object Main {
     }
 
     val x = Await.result(result, 10.seconds)
-    println(x)
 
     val bb                  = x.asByteBuffer
     val version             = bb.getShort
     val statusCode          = bb.getShort
     val requestId           = bb.getInt
-    val operationGroupStart = bb.get
+    println(s"Request ID: $requestId")
 
-    var position = bb.position()
     var isEnd    = bb.get
+    var position = bb.position()
 
     while (isEnd != 0x03.toByte) {
       bb.position(position)
+
       // attribute
       val tag = bb.getChar()
+      println(s"Tag: $tag")
 
       // Name
       val shortLenName = bb.getShort()
-      val bufName      = new Array[Byte](shortLenName)
-      bb.get(bufName, bb.position(), shortLenName)
-      val name = new String(bufName, StandardCharsets.UTF_8)
+      println(s"Name Len: $shortLenName")
+      val name = new String(fromBuffer(bb, shortLenName), StandardCharsets.UTF_8)
 
       // Value
       val shortLenValue = bb.getShort()
-      val bufValue      = new Array[Byte](shortLenValue)
-      bb.get(bufValue, bb.position(), shortLenValue)
-      val value = new String(bufValue, StandardCharsets.UTF_8)
+      val value = new String(fromBuffer(bb, shortLenValue), StandardCharsets.UTF_8)
+
+      println(s"Name: $name - Value: $value")
 
       position = bb.position()
       isEnd = bb.get
