@@ -34,7 +34,7 @@ object Main {
 
     val x = Await.result(result, 10.seconds)
 
-    val y = new Response(x).getResponse
+    val ippResponse = new Response(x).getResponse
 
 
     Http().shutdownAllConnectionPools()
