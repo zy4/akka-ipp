@@ -1,5 +1,7 @@
 package demo
 
+import java.nio.file.{ Files, Paths }
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
@@ -8,11 +10,11 @@ import akka.stream.{ ActorMaterializer, Materializer }
 import akka.util.ByteString
 import de.envisia.{ Constants, Response }
 import de.envisia.services.IPPClient
+
 import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.concurrent.duration._
 
 object Main {
-
 
   def main(args: Array[String]): Unit = {
 
@@ -20,8 +22,8 @@ object Main {
     implicit val mat: Materializer                  = ActorMaterializer()
     implicit val executionContext: ExecutionContext = actorSystem.dispatcher
 
-
-    val client = new IPPClient("http", "192.168.179.149", Constants.WELL_KNOWN_PORT, "", Some(""), Some(""))(actorSystem, mat)
+    val client =
+      new IPPClient("http", "192.168.179.149", Constants.WELL_KNOWN_PORT, "", Some(""), Some(""))(actorSystem, mat)
 
     val response = client.execute
 
@@ -35,6 +37,7 @@ object Main {
     val x = Await.result(result, 10.seconds)
 
     val ippResponse = new Response(x).getResponse
+
 
 
     Http().shutdownAllConnectionPools()
