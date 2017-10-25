@@ -9,7 +9,8 @@ class RequestService(
     user: String = "anonymous",
     jobName: String = "",
     charset: String = "utf-8",
-    format: String = "application/octet-stream"
+    format: String = "application/octet-stream",
+    requestId: Int = 1
 ) {
 
   def getPrinterAttributes: ByteString =
@@ -17,7 +18,7 @@ class RequestService(
       .setCharset(charset)
       .setUri(this.uri + s"${Constants.WELL_KNOWN_PORT}/ipp/print")
       .setLanguage(lang)
-      .buildGetPrinterAttr
+      .buildGetPrinterAttr(requestId)
       .request
 
   def getJobAttributes(jobId: Int): ByteString =
@@ -27,7 +28,7 @@ class RequestService(
       .setLanguage(lang)
       .askWithJobId(jobId)
       .setUser(user)
-      .buildGetJobAttr
+      .buildGetJobAttr(requestId)
       .request
 
   def printJob: ByteString =
@@ -38,7 +39,7 @@ class RequestService(
       .setUser(user)
       .setJobName(jobName)
       .setFormat(format)
-      .buildPrintJob
+      .buildPrintJob(requestId)
       .request
 
   def validateJob: ByteString =
@@ -49,7 +50,7 @@ class RequestService(
       .setUser(user)
       .setJobName(jobName)
       .setFormat(format)
-      .buildPrintJob
+      .buildPrintJob(requestId)
       .request
 
   def createJob: ByteString = ???

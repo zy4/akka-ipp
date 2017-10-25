@@ -4,6 +4,7 @@ import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
 
 import akka.util.ByteString
+import de.envisia.util.RequestId
 
 final class IppRequest(val request: ByteString) extends AnyVal
 
@@ -14,6 +15,7 @@ class RequestBuilder[Request <: RequestBuilder.Request](
   import de.envisia.RequestBuilder.Request._
 
   implicit val bO: ByteOrder = ByteOrder.BIG_ENDIAN
+
 
   /**
     * common setters
@@ -49,11 +51,11 @@ class RequestBuilder[Request <: RequestBuilder.Request](
     new RequestBuilder[Request with JobAttribute](attributes + (name -> (tag, value)))
 
   // generic byte strings
-  @inline protected final def putHeader(operationId: Byte): ByteString =
+  @inline protected final def putHeader(operationId: Byte, requestId: Int): ByteString =
     ByteString.newBuilder
       .putBytes(Array(0x02.toByte, 0x00.toByte))
       .putBytes(Array(0x00.toByte, operationId))
-      .putInt(1) // TODO request id: need to increment (not randomly) because it orders the responses
+      .putInt(requestId) // TODO does not increment
       .putByte(0x01.toByte) // start operation group
       .result()
   @inline protected final def putAttribute(name: String): ByteString =
@@ -69,15 +71,15 @@ class RequestBuilder[Request <: RequestBuilder.Request](
       .putByte(0x03.toByte) // stop operation group
       .result()
 
-  def buildGetPrinterAttr(implicit ev: Request =:= GetPrinterAttributes): IppRequest = new IppRequest(
-    putHeader(0x0b.toByte)
+  def buildGetPrinterAttr(requestId: Int)(implicit ev: Request =:= GetPrinterAttributes): IppRequest = new IppRequest(
+    putHeader(0x0b.toByte, requestId)
       ++ putAttribute("attributes-charset")
       ++ putAttribute("attributes-natural-language")
       ++ putAttribute("printer-uri") ++ putEnd
   )
 
-  def buildPrintJob(implicit ev: Request =:= PrintJob): IppRequest = new IppRequest(
-    putHeader(0x02.toByte)
+  def buildPrintJob(requestId: Int)(implicit ev: Request =:= PrintJob): IppRequest = new IppRequest(
+    putHeader(0x02.toByte, requestId)
       ++ putAttribute("attributes-charset")
       ++ putAttribute("attributes-natural-language")
       ++ putAttribute("printer-uri")
@@ -87,8 +89,8 @@ class RequestBuilder[Request <: RequestBuilder.Request](
       ++ putEnd
   )
 
-  def buildValidateJob(implicit ev: Request =:= ValidateJob): IppRequest = new IppRequest(
-    putHeader(0x04.toByte)
+  def buildValidateJob(requestId: Int)(implicit ev: Request =:= ValidateJob): IppRequest = new IppRequest(
+    putHeader(0x04.toByte, requestId)
       ++ putAttribute("attributes-charset")
       ++ putAttribute("attributes-natural-language")
       ++ putAttribute("printer-uri")
@@ -98,8 +100,8 @@ class RequestBuilder[Request <: RequestBuilder.Request](
       ++ putEnd
   )
 
-  def buildGetJobAttr(implicit ev: Request =:= GetJobAttributes): IppRequest = new IppRequest(
-    putHeader(0x09.toByte)
+  def buildGetJobAttr(requestId: Int)(implicit ev: Request =:= GetJobAttributes): IppRequest = new IppRequest(
+    putHeader(0x09.toByte, requestId)
       ++ putAttribute("attributes-charset")
       ++ putAttribute("attributes-natural-language")
       ++ putAttribute("printer-uri")

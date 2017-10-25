@@ -6,5 +6,5 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait HttpRequestService {
   implicit def ec: ExecutionContext
-  def execute: Future[HttpResponse]
+  def execute(request: HttpRequest): Future[HttpResponse]
 }

@@ -1,19 +1,19 @@
 package de.envisia.services
 
-import java.nio.file.{ Files, Path, Paths }
+import java.util.concurrent.atomic.AtomicInteger
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.MediaType.NotCompressible
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.Materializer
-import akka.stream.scaladsl.{ FileIO, Source }
+import akka.stream.{IOResult, Materializer}
+import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import de.envisia.Response
-import scala.concurrent.duration._
 
-import scala.concurrent.{ Await, ExecutionContext, Future }
+import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class IPPClient(
     prefix: String,
@@ -36,29 +36,42 @@ class IPPClient(
     }
   } */
 
+  private val atomicInt = new AtomicInteger(1)
+
   override implicit val ec: ExecutionContext = actorSystem.dispatcher
 
   private val ippContentType = ContentType(MediaType.customBinary("application", "ipp", NotCompressible))
 
-  private val data1 = new RequestService("ipp://" + host).printJob
+  def printJob(file: Source[ByteString, Future[IOResult]]): Unit = {
 
-  private val data3 = new RequestService("ipp://" + host).getPrinterAttributes
+    val data = new RequestService("ipp://" + host, requestId = atomicInt.incrementAndGet()).printJob
+    val data2 = Source
+      .single(data)
+      .concat(file)
+    val ntt     = HttpEntity(ippContentType, data2)
+    val request = HttpRequest(HttpMethods.POST, uri = s"$prefix://$host:$port", entity = ntt)
 
-  private val data2 = Source
-    .single(data1)
-    .concat(FileIO.fromPath(Paths.get("examples/pdf-sample.pdf")))
+    val response = this.execute(request)
+    val result = response.flatMap {
+      case HttpResponse(StatusCodes.OK, headers, entity, _) =>
+        Unmarshal(entity).to[ByteString]
 
-  private val entity = HttpEntity(ippContentType, data2)
+      case resp => Future.failed(new Exception(s"Unexpected status code ${resp.status}"))
+    }
 
-  private val entity2 = HttpEntity(ippContentType, data3)
+    val x = Await.result(result, 10.seconds)
 
-  private val request = HttpRequest(HttpMethods.POST, uri = s"$prefix://$host:$port", entity = entity)
+    val ippResponse = new Response(x).getResponse
 
-  //Source.single(attribute) + FileIO
+  }
 
-  def printJob(/*file: Path*/): Unit = {
+  def printerAttributes(): Unit = {
 
-    val response = this.execute
+    val data    = new RequestService("ipp://" + host, requestId = atomicInt.incrementAndGet()).getPrinterAttributes
+    val ntt     = HttpEntity(ippContentType, data)
+    val request = HttpRequest(HttpMethods.POST, uri = s"$prefix://$host:$port", entity = ntt)
+
+    val response = this.execute(request)
 
     val result = response.flatMap {
       case HttpResponse(StatusCodes.OK, headers, entity, _) =>
@@ -73,20 +86,12 @@ class IPPClient(
 
   }
 
+  def validateJob() = {}
 
-  def validateJob() = {
-
-
-  }
-
-  def getStatus() = {
-
-
-  }
-
+  def getStatus() = {}
 
   //def printJob(file: Source[ByteString, Any]) = {}
 
-  override def execute: Future[HttpResponse] = Http().singleRequest(request)
+  override def execute(request: HttpRequest): Future[HttpResponse] = Http().singleRequest(request)
 
 }
