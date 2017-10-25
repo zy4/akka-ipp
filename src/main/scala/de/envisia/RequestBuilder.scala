@@ -36,6 +36,9 @@ class RequestBuilder[Request <: RequestBuilder.Request](
   def setFormat(format: String): RequestBuilder[Request with Format] =
     new RequestBuilder(attributes + ("document-format" -> (0x49.toByte, format)))
 
+  def askWithJobId(jobId: Int): RequestBuilder[Request with JobId] =
+    new RequestBuilder(attributes + ("job-id" -> (0x21.toByte, jobId.toString)))
+
   /**
     *  more general setters
     */
@@ -50,7 +53,7 @@ class RequestBuilder[Request <: RequestBuilder.Request](
     ByteString.newBuilder
       .putBytes(Array(0x02.toByte, 0x00.toByte))
       .putBytes(Array(0x00.toByte, operationId))
-      .putInt(1)
+      .putInt(1) // TODO request id: need to increment (not randomly) because it orders the responses
       .putByte(0x01.toByte) // start operation group
       .result()
   @inline protected final def putAttribute(name: String): ByteString =
@@ -67,18 +70,42 @@ class RequestBuilder[Request <: RequestBuilder.Request](
       .result()
 
   def buildGetPrinterAttr(implicit ev: Request =:= GetPrinterAttributes): IppRequest = new IppRequest(
-    putHeader(0x0b.toByte) ++ putAttribute("attributes-charset")
+    putHeader(0x0b.toByte)
+      ++ putAttribute("attributes-charset")
       ++ putAttribute("attributes-natural-language")
       ++ putAttribute("printer-uri") ++ putEnd
   )
 
   def buildPrintJob(implicit ev: Request =:= PrintJob): IppRequest = new IppRequest(
-    putHeader(0x02.toByte) ++ putAttribute("attributes-charset")
+    putHeader(0x02.toByte)
+      ++ putAttribute("attributes-charset")
       ++ putAttribute("attributes-natural-language")
       ++ putAttribute("printer-uri")
       ++ putAttribute("requesting-user-name")
       ++ putAttribute("job-name")
       ++ putAttribute("document-format")
+      ++ putEnd
+  )
+
+  def buildValidateJob(implicit ev: Request =:= ValidateJob): IppRequest = new IppRequest(
+    putHeader(0x04.toByte)
+      ++ putAttribute("attributes-charset")
+      ++ putAttribute("attributes-natural-language")
+      ++ putAttribute("printer-uri")
+      ++ putAttribute("requesting-user-name")
+      ++ putAttribute("job-name")
+      ++ putAttribute("document-format")
+      ++ putEnd
+  )
+
+  def buildGetJobAttr(implicit ev: Request =:= GetJobAttributes): IppRequest = new IppRequest(
+    putHeader(0x09.toByte)
+      ++ putAttribute("attributes-charset")
+      ++ putAttribute("attributes-natural-language")
+      ++ putAttribute("printer-uri")
+      ++ putAttribute("job-id")
+      ++ putAttribute("requesting-user-name")
+    // ++ putAttribute("requested-attributes") // optionally https://tools.ietf.org/html/rfc2911#section-3.2.5.1
       ++ putEnd
   )
 
@@ -99,11 +126,13 @@ object RequestBuilder {
     sealed trait Format             extends Request
     sealed trait JobAttribute       extends Request
     sealed trait OperationAttribute extends Request
+    sealed trait JobId              extends Request
 
     //type MinimalRequest = EmptyRequest
     type GetPrinterAttributes = EmptyRequest with Charset with Language with PrinterUri
     type PrintJob             = EmptyRequest with Charset with Language with PrinterUri with User with JobName with Format
     type ValidateJob          = EmptyRequest
+    type GetJobAttributes     = EmptyRequest with Charset with Language with PrinterUri with User with JobId
 
   }
 
