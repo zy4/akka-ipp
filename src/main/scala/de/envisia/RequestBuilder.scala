@@ -53,13 +53,13 @@ class RequestBuilder[Request <: RequestBuilder.Request](
       .putInt(1)
       .putByte(0x01.toByte) // start operation group
       .result()
-  @inline protected final def putAttribute(tag: Byte, name: String, value: String): ByteString =
+  @inline protected final def putAttribute(name: String): ByteString =
     ByteString.newBuilder
-      .putByte(tag)
+      .putByte(attributes(name)._1)
       .putShort(name.length)
       .putBytes(name.getBytes(StandardCharsets.UTF_8))
-      .putShort(value.length)
-      .putBytes(value.getBytes(StandardCharsets.UTF_8))
+      .putShort(attributes(name)._2.length)
+      .putBytes(attributes(name)._2.getBytes(StandardCharsets.UTF_8))
       .result()
   @inline protected val putEnd: ByteString =
     ByteString.newBuilder
@@ -67,38 +67,18 @@ class RequestBuilder[Request <: RequestBuilder.Request](
       .result()
 
   def buildGetPrinterAttr(implicit ev: Request =:= GetPrinterAttributes): IppRequest = new IppRequest(
-    putHeader(0x0b.toByte) ++ putAttribute(
-      attributes("attributes-charset")._1,
-      "attributes-charset",
-      attributes("attributes-charset")._2
-    )
-      ++ putAttribute(
-        attributes("attributes-natural-language")._1,
-        "attributes-natural-language",
-        attributes("attributes-natural-language")._2
-      )
-      ++ putAttribute(attributes("printer-uri")._1, "printer-uri", attributes("printer-uri")._2) ++ putEnd
+    putHeader(0x0b.toByte) ++ putAttribute("attributes-charset")
+      ++ putAttribute("attributes-natural-language")
+      ++ putAttribute("printer-uri") ++ putEnd
   )
 
   def buildPrintJob(implicit ev: Request =:= PrintJob): IppRequest = new IppRequest(
-    putHeader(0x02.toByte) ++ putAttribute(
-      attributes("attributes-charset")._1,
-      "attributes-charset",
-      attributes("attributes-charset")._2
-    )
-      ++ putAttribute(
-        attributes("attributes-natural-language")._1,
-        "attributes-natural-language",
-        attributes("attributes-natural-language")._2
-      )
-      ++ putAttribute(attributes("printer-uri")._1, "printer-uri", attributes("printer-uri")._2)
-      ++ putAttribute(
-        attributes("requesting-user-name")._1,
-        "requesting-user-name",
-        attributes("requesting-user-name")._2
-      )
-      ++ putAttribute(attributes("job-name")._1, "job-name", attributes("job-name")._2)
-      ++ putAttribute(attributes("document-format")._1, "document-format", attributes("document-format")._2)
+    putHeader(0x02.toByte) ++ putAttribute("attributes-charset")
+      ++ putAttribute("attributes-natural-language")
+      ++ putAttribute("printer-uri")
+      ++ putAttribute("requesting-user-name")
+      ++ putAttribute("job-name")
+      ++ putAttribute("document-format")
       ++ putEnd
   )
 
