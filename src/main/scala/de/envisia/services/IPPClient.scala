@@ -10,7 +10,7 @@ import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.{IOResult, Materializer}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import de.envisia.{GetPrinterAttributes, PrintJob, RequestType, Response}
+import de.envisia.{GetPrinterAttributes, PrintJob, OperationType, Response}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -48,7 +48,7 @@ class IPPClient(
   def printerAttributes(): Unit =
     dispatch(GetPrinterAttributes)
 
-  final protected def dispatch(ev: RequestType): Unit = {
+  final protected def dispatch(ev: OperationType): Unit = {
 
     val ntt = ev match {
 
