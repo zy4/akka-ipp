@@ -5,8 +5,8 @@ import de.envisia.{Constants, RequestBuilder}
 
 class RequestService(
     uri: String,
-    lang: String = "de-de",
-    user: String = "anonymous",
+    lang: String = "en-us",
+    user: String = "dummy",
     jobName: String = "",
     charset: String = "utf-8",
     format: String = "application/octet-stream",

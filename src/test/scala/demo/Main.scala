@@ -24,7 +24,7 @@ object Main {
       new IPPClient("http", "192.168.179.149", Constants.WELL_KNOWN_PORT, "", Some(""), Some(""))(actorSystem, mat)
 
     client.printJob(FileIO.fromPath(Paths.get("examples/pdf-sample.pdf")))
-    client.printerAttributes()
+    //client.printerAttributes()
 
     Http().shutdownAllConnectionPools()
     actorSystem.terminate()

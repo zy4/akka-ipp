@@ -10,7 +10,7 @@ import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.{IOResult, Materializer}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import de.envisia.Response
+import de.envisia.{GetPrinterAttributes, PrintJob, RequestType, Response}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -42,13 +42,27 @@ class IPPClient(
 
   private val ippContentType = ContentType(MediaType.customBinary("application", "ipp", NotCompressible))
 
-  def printJob(file: Source[ByteString, Future[IOResult]]): Unit = {
+  def printJob(file: Source[ByteString, Future[IOResult]]): Unit =
+    dispatch(PrintJob(file))
 
-    val data = new RequestService("ipp://" + host, requestId = atomicInt.incrementAndGet()).printJob
-    val data2 = Source
-      .single(data)
-      .concat(file)
-    val ntt     = HttpEntity(ippContentType, data2)
+  def printerAttributes(): Unit =
+    dispatch(GetPrinterAttributes)
+
+  final protected def dispatch(ev: RequestType): Unit = {
+
+    val ntt = ev match {
+
+      case PrintJob(file) =>
+        val data = Source
+          .single(new RequestService("ipp://" + host, requestId = atomicInt.incrementAndGet()).printJob)
+          .concat(file)
+        HttpEntity(ippContentType, data)
+      case GetPrinterAttributes =>
+        val data = new RequestService("ipp://" + host, requestId = atomicInt.incrementAndGet()).getPrinterAttributes
+        HttpEntity(ippContentType, data)
+
+    }
+
     val request = HttpRequest(HttpMethods.POST, uri = s"$prefix://$host:$port", entity = ntt)
 
     val response = this.execute(request)
@@ -64,33 +78,6 @@ class IPPClient(
     val ippResponse = new Response(x).getResponse
 
   }
-
-  def printerAttributes(): Unit = {
-
-    val data    = new RequestService("ipp://" + host, requestId = atomicInt.incrementAndGet()).getPrinterAttributes
-    val ntt     = HttpEntity(ippContentType, data)
-    val request = HttpRequest(HttpMethods.POST, uri = s"$prefix://$host:$port", entity = ntt)
-
-    val response = this.execute(request)
-
-    val result = response.flatMap {
-      case HttpResponse(StatusCodes.OK, headers, entity, _) =>
-        Unmarshal(entity).to[ByteString]
-
-      case resp => Future.failed(new Exception(s"Unexpected status code ${resp.status}"))
-    }
-
-    val x = Await.result(result, 10.seconds)
-
-    val ippResponse = new Response(x).getResponse
-
-  }
-
-  def validateJob() = {}
-
-  def getStatus() = {}
-
-  //def printJob(file: Source[ByteString, Any]) = {}
 
   override def execute(request: HttpRequest): Future[HttpResponse] = Http().singleRequest(request)
 

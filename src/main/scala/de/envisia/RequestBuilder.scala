@@ -4,7 +4,6 @@ import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
 
 import akka.util.ByteString
-import de.envisia.util.RequestId
 
 final class IppRequest(val request: ByteString) extends AnyVal
 
@@ -49,6 +48,25 @@ class RequestBuilder[Request <: RequestBuilder.Request](
 
   def addJobAttribute(tag: Byte, name: String, value: String): RequestBuilder[Request with JobAttribute] =
     new RequestBuilder[Request with JobAttribute](attributes + (name -> (tag, value)))
+
+
+
+  //http://tools.ietf.org/html/rfc2910#section-3.1.1
+  //	-----------------------------------------------
+  //	|                  version-number             |   2 bytes  - required
+  //	-----------------------------------------------
+  //	|               operation-id (request)        |
+  //	|                      or                     |   2 bytes  - required
+  //	|               status-code (response)        |
+  //	-----------------------------------------------
+  //	|                   request-id                |   4 bytes  - required
+  //	-----------------------------------------------
+  //	|                 attribute-group             |   n bytes - 0 or more
+  //	-----------------------------------------------
+  //	|              end-of-attributes-tag          |   1 byte   - required
+  //	-----------------------------------------------
+  //	|                     data                    |   q bytes  - optional
+  //	-----------------------------------------------
 
   // generic byte strings
   @inline protected final def putHeader(operationId: Byte, requestId: Int): ByteString =
