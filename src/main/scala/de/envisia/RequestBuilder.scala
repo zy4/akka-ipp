@@ -71,7 +71,7 @@ class RequestBuilder[Request <: RequestBuilder.Request](
       .putBytes(Array(0x02.toByte, 0x00.toByte))
       .putBytes(Array(0x00.toByte, operationId))
       .putInt(requestId) // TODO does not increment
-      .putByte(0x01.toByte) // start operation group
+      .putByte(Constants.ATTRIBUTE_GROUPS("operation-attributes-tag"))
       .result()
   @inline protected final def putAttribute(name: String): ByteString =
     ByteString.newBuilder
@@ -83,7 +83,7 @@ class RequestBuilder[Request <: RequestBuilder.Request](
       .result()
   @inline protected val putEnd: ByteString =
     ByteString.newBuilder
-      .putByte(0x03.toByte) // stop operation group
+      .putByte(Constants.ATTRIBUTE_GROUPS("end-of-attributes-tag"))
       .result()
 
   def buildGetPrinterAttr(operationId: Byte, requestId: Int)(
