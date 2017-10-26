@@ -13,25 +13,25 @@ class RequestService(
     requestId: Int = 1
 ) {
 
-  def getPrinterAttributes: ByteString =
+  def getPrinterAttributes(operationId: Byte): ByteString =
     new RequestBuilder[RequestBuilder.Request.GetPrinterAttributes]()
       .setCharset(charset)
       .setUri(this.uri + s"${Constants.WELL_KNOWN_PORT}/ipp/print")
       .setLanguage(lang)
-      .buildGetPrinterAttr(requestId)
+      .buildGetPrinterAttr(operationId, requestId)
       .request
 
-  def getJobAttributes(jobId: Int): ByteString =
+  def getJobAttributes(operationId: Byte, jobId: Int): ByteString =
     new RequestBuilder[RequestBuilder.Request.GetJobAttributes]()
       .setCharset(charset)
       .setUri(this.uri + s"${Constants.WELL_KNOWN_PORT}/ipp/print")
       .setLanguage(lang)
       .askWithJobId(jobId)
       .setUser(user)
-      .buildGetJobAttr(requestId)
+      .buildGetJobAttr(operationId, requestId)
       .request
 
-  def printJob: ByteString =
+  def printJob(operationId: Byte): ByteString =
     new RequestBuilder[RequestBuilder.Request.PrintJob]()
       .setCharset(charset)
       .setUri(this.uri + s"${Constants.WELL_KNOWN_PORT}/ipp/print")
@@ -39,10 +39,10 @@ class RequestService(
       .setUser(user)
       .setJobName(jobName)
       .setFormat(format)
-      .buildPrintJob(requestId)
+      .buildPrintJob(operationId, requestId)
       .request
 
-  def validateJob: ByteString =
+  def validateJob(operationId: Byte): ByteString =
     new RequestBuilder[RequestBuilder.Request.ValidateJob]()
       .setCharset(charset)
       .setUri(this.uri + s"${Constants.WELL_KNOWN_PORT}/ipp/print")
@@ -50,7 +50,7 @@ class RequestService(
       .setUser(user)
       .setJobName(jobName)
       .setFormat(format)
-      .buildPrintJob(requestId)
+      .buildPrintJob(operationId, requestId)
       .request
 
   def createJob: ByteString = ???

@@ -15,7 +15,6 @@ class RequestBuilder[Request <: RequestBuilder.Request](
 
   implicit val bO: ByteOrder = ByteOrder.BIG_ENDIAN
 
-
   /**
     * common setters
     */
@@ -48,8 +47,6 @@ class RequestBuilder[Request <: RequestBuilder.Request](
 
   def addJobAttribute(tag: Byte, name: String, value: String): RequestBuilder[Request with JobAttribute] =
     new RequestBuilder[Request with JobAttribute](attributes + (name -> (tag, value)))
-
-
 
   //http://tools.ietf.org/html/rfc2910#section-3.1.1
   //	-----------------------------------------------
@@ -89,15 +86,17 @@ class RequestBuilder[Request <: RequestBuilder.Request](
       .putByte(0x03.toByte) // stop operation group
       .result()
 
-  def buildGetPrinterAttr(requestId: Int)(implicit ev: Request =:= GetPrinterAttributes): IppRequest = new IppRequest(
-    putHeader(0x0b.toByte, requestId)
+  def buildGetPrinterAttr(operationId: Byte, requestId: Int)(
+      implicit ev: Request =:= GetPrinterAttributes
+  ): IppRequest = new IppRequest(
+    putHeader(operationId, requestId)
       ++ putAttribute("attributes-charset")
       ++ putAttribute("attributes-natural-language")
       ++ putAttribute("printer-uri") ++ putEnd
   )
 
-  def buildPrintJob(requestId: Int)(implicit ev: Request =:= PrintJob): IppRequest = new IppRequest(
-    putHeader(0x02.toByte, requestId)
+  def buildPrintJob(operationId: Byte, requestId: Int)(implicit ev: Request =:= PrintJob): IppRequest = new IppRequest(
+    putHeader(operationId, requestId)
       ++ putAttribute("attributes-charset")
       ++ putAttribute("attributes-natural-language")
       ++ putAttribute("printer-uri")
@@ -107,27 +106,29 @@ class RequestBuilder[Request <: RequestBuilder.Request](
       ++ putEnd
   )
 
-  def buildValidateJob(requestId: Int)(implicit ev: Request =:= ValidateJob): IppRequest = new IppRequest(
-    putHeader(0x04.toByte, requestId)
-      ++ putAttribute("attributes-charset")
-      ++ putAttribute("attributes-natural-language")
-      ++ putAttribute("printer-uri")
-      ++ putAttribute("requesting-user-name")
-      ++ putAttribute("job-name")
-      ++ putAttribute("document-format")
-      ++ putEnd
-  )
+  def buildValidateJob(operationId: Byte, requestId: Int)(implicit ev: Request =:= ValidateJob): IppRequest =
+    new IppRequest(
+      putHeader(operationId, requestId)
+        ++ putAttribute("attributes-charset")
+        ++ putAttribute("attributes-natural-language")
+        ++ putAttribute("printer-uri")
+        ++ putAttribute("requesting-user-name")
+        ++ putAttribute("job-name")
+        ++ putAttribute("document-format")
+        ++ putEnd
+    )
 
-  def buildGetJobAttr(requestId: Int)(implicit ev: Request =:= GetJobAttributes): IppRequest = new IppRequest(
-    putHeader(0x09.toByte, requestId)
-      ++ putAttribute("attributes-charset")
-      ++ putAttribute("attributes-natural-language")
-      ++ putAttribute("printer-uri")
-      ++ putAttribute("job-id")
-      ++ putAttribute("requesting-user-name")
-    // ++ putAttribute("requested-attributes") // optionally https://tools.ietf.org/html/rfc2911#section-3.2.5.1
-      ++ putEnd
-  )
+  def buildGetJobAttr(operationId: Byte, requestId: Int)(implicit ev: Request =:= GetJobAttributes): IppRequest =
+    new IppRequest(
+      putHeader(operationId, requestId)
+        ++ putAttribute("attributes-charset")
+        ++ putAttribute("attributes-natural-language")
+        ++ putAttribute("printer-uri")
+        ++ putAttribute("job-id")
+        ++ putAttribute("requesting-user-name")
+      // ++ putAttribute("requested-attributes") // optionally https://tools.ietf.org/html/rfc2911#section-3.2.5.1
+        ++ putEnd
+    )
 
 }
 

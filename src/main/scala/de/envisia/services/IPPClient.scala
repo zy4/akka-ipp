@@ -54,11 +54,16 @@ class IPPClient(
 
       case PrintJob(file) =>
         val data = Source
-          .single(new RequestService("ipp://" + host, requestId = atomicInt.incrementAndGet()).printJob)
+          .single(
+            new RequestService("ipp://" + host, requestId = atomicInt.incrementAndGet())
+              .printJob(PrintJob(file).operationId)
+          )
           .concat(file)
         HttpEntity(ippContentType, data)
+
       case GetPrinterAttributes =>
-        val data = new RequestService("ipp://" + host, requestId = atomicInt.incrementAndGet()).getPrinterAttributes
+        val data = new RequestService("ipp://" + host, requestId = atomicInt.incrementAndGet())
+          .getPrinterAttributes(GetPrinterAttributes.operationId)
         HttpEntity(ippContentType, data)
 
     }
