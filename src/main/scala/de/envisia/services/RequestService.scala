@@ -1,7 +1,8 @@
 package de.envisia.services
 
 import akka.util.ByteString
-import de.envisia.{Constants, RequestBuilder}
+import de.envisia.RequestBuilder
+import de.envisia.attributes.Constants
 
 class RequestService(
     uri: String,

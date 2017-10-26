@@ -2,7 +2,7 @@ package de.envisia
 
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
-
+import de.envisia.attributes.Constants._
 import akka.util.ByteString
 
 final class IppRequest(val request: ByteString) extends AnyVal
@@ -19,25 +19,27 @@ class RequestBuilder[Request <: RequestBuilder.Request](
     * common setters
     */
   def setCharset(charset: String): RequestBuilder[Request with Charset] =
-    new RequestBuilder(attributes + ("attributes-charset" -> (0x47.toByte, charset)))
+    new RequestBuilder(attributes + ("attributes-charset" -> (ATTRIBUTE_TAGS("attributes-charset"), charset)))
 
   def setUri(uri: String): RequestBuilder[Request with PrinterUri] =
-    new RequestBuilder(attributes + ("printer-uri" -> (0x45.toByte, uri)))
+    new RequestBuilder(attributes + ("printer-uri" -> (ATTRIBUTE_TAGS("printer-uri"), uri)))
 
   def setLanguage(lang: String): RequestBuilder[Request with Language] =
-    new RequestBuilder(attributes + ("attributes-natural-language" -> (0x48.toByte, lang)))
+    new RequestBuilder(
+      attributes + ("attributes-natural-language" -> (ATTRIBUTE_TAGS("attributes-natural-language"), lang))
+    )
 
   def setUser(user: String): RequestBuilder[Request with User] =
-    new RequestBuilder(attributes + ("requesting-user-name" -> (0x42.toByte, user)))
+    new RequestBuilder(attributes + ("requesting-user-name" -> (ATTRIBUTE_TAGS("requesting-user-name"), user)))
 
   def setJobName(jobName: String): RequestBuilder[Request with JobName] =
-    new RequestBuilder(attributes + ("job-name" -> (0x42.toByte, jobName)))
+    new RequestBuilder(attributes + ("job-name" -> (ATTRIBUTE_TAGS("job-name"), jobName)))
 
   def setFormat(format: String): RequestBuilder[Request with Format] =
-    new RequestBuilder(attributes + ("document-format" -> (0x49.toByte, format)))
+    new RequestBuilder(attributes + ("document-format" -> (ATTRIBUTE_TAGS("document-format"), format)))
 
   def askWithJobId(jobId: Int): RequestBuilder[Request with JobId] =
-    new RequestBuilder(attributes + ("job-id" -> (0x21.toByte, jobId.toString)))
+    new RequestBuilder(attributes + ("job-id" -> (ATTRIBUTE_TAGS("job-id"), jobId.toString)))
 
   /**
     *  more general setters
@@ -71,7 +73,7 @@ class RequestBuilder[Request <: RequestBuilder.Request](
       .putBytes(Array(0x02.toByte, 0x00.toByte))
       .putBytes(Array(0x00.toByte, operationId))
       .putInt(requestId) // TODO does not increment
-      .putByte(Constants.ATTRIBUTE_GROUPS("operation-attributes-tag"))
+      .putByte(ATTRIBUTE_GROUPS("operation-attributes-tag"))
       .result()
   @inline protected final def putAttribute(name: String): ByteString =
     ByteString.newBuilder
@@ -83,7 +85,7 @@ class RequestBuilder[Request <: RequestBuilder.Request](
       .result()
   @inline protected val putEnd: ByteString =
     ByteString.newBuilder
-      .putByte(Constants.ATTRIBUTE_GROUPS("end-of-attributes-tag"))
+      .putByte(ATTRIBUTE_GROUPS("end-of-attributes-tag"))
       .result()
 
   def buildGetPrinterAttr(operationId: Byte, requestId: Int)(

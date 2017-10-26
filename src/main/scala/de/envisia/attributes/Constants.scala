@@ -1,4 +1,4 @@
-package de.envisia
+package de.envisia.attributes
 
 object Constants {
 
@@ -17,6 +17,16 @@ object Constants {
     "Print-Job"              -> 0x02.toByte,
     "Validate-Job"           -> 0x04.toByte,
     "Get-Job-Attributes"     -> 0x09.toByte
+  )
+
+  final val ATTRIBUTE_TAGS: Map[String, Byte] = Map(
+    "attributes-charset"          -> 0x47.toByte,
+    "printer-uri"                 -> 0x45.toByte,
+    "attributes-natural-language" -> 0x48.toByte,
+    "requesting-user-name"        -> 0x42.toByte,
+    "job-name"                    -> 0x42.toByte,
+    "document-format"             -> 0x49.toByte,
+    "job-id"                      -> 0x21.toByte
   )
 
 }

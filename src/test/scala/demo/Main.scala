@@ -6,7 +6,7 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.scaladsl.FileIO
 import akka.stream.{ ActorMaterializer, Materializer }
-import de.envisia.Constants
+import de.envisia.attributes.Constants
 import de.envisia.services.IPPClient
 
 import scala.concurrent.ExecutionContext
