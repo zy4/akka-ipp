@@ -2,7 +2,7 @@ package de.envisia
 
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
-import de.envisia.attributes.Constants._
+import de.envisia.attributes.Attributes._
 import akka.util.ByteString
 
 final class IppRequest(val request: ByteString) extends AnyVal

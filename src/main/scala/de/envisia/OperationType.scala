@@ -5,7 +5,7 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 
 import scala.concurrent.Future
-import de.envisia.attributes.Constants._
+import de.envisia.attributes.Attributes._
 
 sealed abstract class OperationType(val name: String, val operationId: Byte)
 

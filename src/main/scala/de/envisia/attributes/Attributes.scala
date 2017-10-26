@@ -1,6 +1,6 @@
 package de.envisia.attributes
 
-object Constants {
+object Attributes {
 
   final val WELL_KNOWN_PORT = 631
 

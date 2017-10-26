@@ -1,5 +1,5 @@
 package de.envisia.exceptions
 
-class StatusCodes {
+object StatusCodes {
 
 }
