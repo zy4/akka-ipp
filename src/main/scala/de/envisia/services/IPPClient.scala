@@ -10,10 +10,9 @@ import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.{IOResult, Materializer}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import de.envisia.{GetPrinterAttributes, PrintJob, OperationType, Response}
+import de.envisia.{GetPrinterAttributes, OperationType, PrintJob, Response}
 
-import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 
 class IPPClient(
     prefix: String,
@@ -36,7 +35,13 @@ class IPPClient(
     }
   } */
 
-  private val atomicInt = new AtomicInteger(1)
+  private val atomicInt = new AtomicInteger(0)
+
+  private def getRequestId: Int = {
+    atomicInt.updateAndGet(
+      x => if (x + 1 == Int.MaxValue) 1 else x + 1
+    )
+  }
 
   override implicit val ec: ExecutionContext = actorSystem.dispatcher
 
@@ -45,24 +50,24 @@ class IPPClient(
   def printJob(file: Source[ByteString, Future[IOResult]]): Unit =
     dispatch(PrintJob(file))
 
-  def printerAttributes(): Unit =
+  def printerAttributes(): Future[Response.IppResponse] =
     dispatch(GetPrinterAttributes)
 
-  final protected def dispatch(ev: OperationType): Unit = {
+  final protected def dispatch(ev: OperationType): Future[Response.IppResponse] = {
 
     val ntt = ev match {
 
       case PrintJob(file) =>
         val data = Source
           .single(
-            new RequestService("ipp://" + host, requestId = atomicInt.incrementAndGet())
+            new RequestService("ipp://" + host, requestId = getRequestId)
               .printJob(PrintJob(file).operationId)
           )
           .concat(file)
         HttpEntity(ippContentType, data)
 
       case GetPrinterAttributes =>
-        val data = new RequestService("ipp://" + host, requestId = atomicInt.incrementAndGet())
+        val data = new RequestService("ipp://" + host, requestId = getRequestId)
           .getPrinterAttributes(GetPrinterAttributes.operationId)
         HttpEntity(ippContentType, data)
 
@@ -78,9 +83,7 @@ class IPPClient(
       case resp => Future.failed(new Exception(s"Unexpected status code ${resp.status}"))
     }
 
-    val x = Await.result(result, 10.seconds)
-
-    val ippResponse = new Response(x).getResponse
+    result.map(bs => new Response(bs).getResponse)
 
   }
 

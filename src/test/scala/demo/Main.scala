@@ -9,7 +9,8 @@ import akka.stream.{ ActorMaterializer, Materializer }
 import de.envisia.attributes.Attributes._
 import de.envisia.services.IPPClient
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ Await, ExecutionContext, Future }
+import scala.concurrent.duration._
 
 object Main {
 
@@ -24,7 +25,13 @@ object Main {
       new IPPClient("http", "192.168.179.149", WELL_KNOWN_PORT, "", Some(""), Some(""))(actorSystem, mat)
 
     //client.printJob(FileIO.fromPath(Paths.get("examples/pdf-sample.pdf")))
-    client.printerAttributes()
+    val jobs = for (i <- 1 to 1000) yield {
+      if (i % 10 == 0)
+        Thread.sleep(200)
+      client.printerAttributes()
+    }
+
+    Await.ready(Future.sequence(jobs), 10.minutes)
 
     Http().shutdownAllConnectionPools()
     actorSystem.terminate()
