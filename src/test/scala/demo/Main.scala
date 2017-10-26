@@ -24,14 +24,18 @@ object Main {
     val client =
       new IPPClient("http", "192.168.179.149", WELL_KNOWN_PORT, "", Some(""), Some(""))(actorSystem, mat)
 
-    //client.printJob(FileIO.fromPath(Paths.get("examples/pdf-sample.pdf")))
-    val jobs = for (i <- 1 to 1000) yield {
+    val printJob = client.printJob(FileIO.fromPath(Paths.get("examples/pdf-sample.pdf")))
+    Await.result(printJob, 10.seconds)
+
+    /*val jobs = for (i <- 1 to 2) yield {
       if (i % 10 == 0)
         Thread.sleep(200)
       client.printerAttributes()
     }
 
     Await.ready(Future.sequence(jobs), 10.minutes)
+    */
+
 
     Http().shutdownAllConnectionPools()
     actorSystem.terminate()

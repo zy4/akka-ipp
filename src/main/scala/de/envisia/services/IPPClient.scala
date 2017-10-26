@@ -37,17 +37,16 @@ class IPPClient(
 
   private val atomicInt = new AtomicInteger(0)
 
-  private def getRequestId: Int = {
+  private def getRequestId: Int =
     atomicInt.updateAndGet(
       x => if (x + 1 == Int.MaxValue) 1 else x + 1
     )
-  }
 
   override implicit val ec: ExecutionContext = actorSystem.dispatcher
 
   private val ippContentType = ContentType(MediaType.customBinary("application", "ipp", NotCompressible))
 
-  def printJob(file: Source[ByteString, Future[IOResult]]): Unit =
+  def printJob(file: Source[ByteString, Future[IOResult]]): Future[Response.IppResponse] =
     dispatch(PrintJob(file))
 
   def printerAttributes(): Future[Response.IppResponse] =
@@ -55,23 +54,19 @@ class IPPClient(
 
   final protected def dispatch(ev: OperationType): Future[Response.IppResponse] = {
 
-    val ntt = ev match {
+    val service = new RequestService("ipp://" + host, requestId = getRequestId)
+
+    val body = ev match {
 
       case PrintJob(file) =>
-        val data = Source
-          .single(
-            new RequestService("ipp://" + host, requestId = getRequestId)
-              .printJob(PrintJob(file).operationId)
-          )
-          .concat(file)
-        HttpEntity(ippContentType, data)
+        Source.single(service.printJob(PrintJob(file).operationId)).concat(file)
 
       case GetPrinterAttributes =>
-        val data = new RequestService("ipp://" + host, requestId = getRequestId)
-          .getPrinterAttributes(GetPrinterAttributes.operationId)
-        HttpEntity(ippContentType, data)
+        Source.single(service.getPrinterAttributes(GetPrinterAttributes.operationId))
 
     }
+
+    val ntt = HttpEntity(ippContentType, body)
 
     val request = HttpRequest(HttpMethods.POST, uri = s"$prefix://$host:$port", entity = ntt)
 

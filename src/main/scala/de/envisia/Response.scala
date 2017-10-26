@@ -1,6 +1,8 @@
 package de.envisia
 
+import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
+
 import akka.util.ByteString
 import de.envisia.Response.IppResponse
 import de.envisia.util.IppHelper
@@ -45,7 +47,17 @@ class Response(x: ByteString) {
 
         // value
         val shortLenValue = bb.getShort()
-        val value         = new String(IppHelper.fromBuffer(bb, shortLenValue), StandardCharsets.UTF_8)
+
+        /* val value =
+          case class Attribute(array: Array[Byte]) {
+            def getInt: Int = ByteBuffer.wrap(array).getInt()
+            def getString: String = new String(array, StandardCharsets.UTF_8)
+          } */
+
+          val value = name match {
+            case n if n != "job-id" => new String(IppHelper.fromBuffer(bb, shortLenValue), StandardCharsets.UTF_8)
+            case _                  =>  ByteBuffer.wrap(IppHelper.fromBuffer(bb, shortLenValue)).getInt.toString
+          }
 
         val tag = attributes.get(name)
 
@@ -53,12 +65,14 @@ class Response(x: ByteString) {
       }
     }
 
-    val attrs = parseAttributes(0x01.toByte, Map.empty) //TODO group byte?
+    val printerAttrs = parseAttributes(0x01.toByte, Map.empty) //TODO group byte? groupbyte not yet used
 
-    val result = IppResponse(version, statusCode, requestId, attrs)
+    val result = IppResponse(version, statusCode, requestId, printerAttrs)
 
     println(result)
-    println(attrs.size)
+    println(printerAttrs.size)
+    print("jobstate ..." + printerAttrs("job-state"))
+    print("jobid ..." + printerAttrs("job-id"))
 
     result
   }
@@ -67,6 +81,11 @@ class Response(x: ByteString) {
 
 object Response {
 
-  case class IppResponse(version: Short, statusCode: Short, requestId: Int, attributes: Map[String, List[String]])
+  case class IppResponse(
+      version: Short,
+      statusCode: Short,
+      requestId: Int,
+      printerAttributes: Map[String, List[String]]
+  )
 
 }
