@@ -6,7 +6,7 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.scaladsl.FileIO
 import akka.stream.{ ActorMaterializer, Materializer }
-import de.envisia.attributes.Attributes
+import de.envisia.attributes.Attributes._
 import de.envisia.services.IPPClient
 
 import scala.concurrent.ExecutionContext
@@ -21,7 +21,7 @@ object Main {
 
 
     val client =
-      new IPPClient("http", "192.168.179.149", Attributes.WELL_KNOWN_PORT, "", Some(""), Some(""))(actorSystem, mat)
+      new IPPClient("http", "192.168.179.149", WELL_KNOWN_PORT, "", Some(""), Some(""))(actorSystem, mat)
 
     //client.printJob(FileIO.fromPath(Paths.get("examples/pdf-sample.pdf")))
     client.printerAttributes()
