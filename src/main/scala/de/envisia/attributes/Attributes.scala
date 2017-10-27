@@ -1,5 +1,6 @@
 package de.envisia.attributes
 
+
 object Attributes {
 
   final val WELL_KNOWN_PORT = 631
@@ -28,5 +29,8 @@ object Attributes {
     "document-format"             -> 0x49.toByte,
     "job-id"                      -> 0x21.toByte
   )
+
+  //attr tags Integer (0x21) && Enum (0x23)
+  final val NUMERIC_TAGS: Seq[Byte] = Seq(0x21.toByte, 0x23.toByte)
 
 }

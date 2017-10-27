@@ -54,10 +54,11 @@ class Response(x: ByteString) {
             def getString: String = new String(array, StandardCharsets.UTF_8)
           } */
 
-          val value = name match {
-            case n if n != "job-id" => new String(IppHelper.fromBuffer(bb, shortLenValue), StandardCharsets.UTF_8)
-            case _                  =>  ByteBuffer.wrap(IppHelper.fromBuffer(bb, shortLenValue)).getInt.toString
-          }
+        val value = attrTag match {
+          case b if !NUMERIC_TAGS.contains(b) =>
+            new String(IppHelper.fromBuffer(bb, shortLenValue), StandardCharsets.UTF_8)
+          case _ => ByteBuffer.wrap(IppHelper.fromBuffer(bb, shortLenValue)).getInt.toString
+        }
 
         val tag = attributes.get(name)
 
