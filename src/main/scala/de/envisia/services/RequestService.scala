@@ -51,11 +51,29 @@ class RequestService(
       .setUser(user)
       .setJobName(jobName)
       .setFormat(format)
-      .buildPrintJob(operationId, requestId)
+      .buildValidateJob(operationId, requestId)
       .request
 
-  def createJob: ByteString = ???
+  def createJob(operationId: Byte): ByteString =
+    new RequestBuilder[RequestBuilder.Request.CreateJob]()
+      .setCharset(charset)
+      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/print")
+      .setLanguage(lang)
+      .setUser(user)
+      .setJobName(jobName)
+      .setFormat(format)
+      .buildCreateJob(operationId, requestId)
+      .request
 
-  def getStatus: ByteString = ???
+  def sendDocument(operationId: Byte): ByteString =
+    new RequestBuilder[RequestBuilder.Request.SendDocument]()
+      .setCharset(charset)
+      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/print")
+      .setLanguage(lang)
+      .setUser(user)
+      .setJobName(jobName)
+      .setFormat(format)
+      .buildSendDocument(operationId, requestId)
+      .request
 
 }

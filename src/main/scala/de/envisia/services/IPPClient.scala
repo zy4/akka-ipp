@@ -10,7 +10,7 @@ import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.{IOResult, Materializer}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import de.envisia.{GetPrinterAttributes, OperationType, PrintJob, Response}
+import de.envisia._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -52,6 +52,15 @@ class IPPClient(
   def printerAttributes(): Future[Response.IppResponse] =
     dispatch(GetPrinterAttributes)
 
+  def validateJob(): Future[Response.IppResponse] =
+    dispatch(ValidateJob)
+
+  def createJob(): Future[Response.IppResponse] =
+    dispatch(CreateJob)
+
+  def sendDocument(file: Source[ByteString, Future[IOResult]]): Future[Response.IppResponse] =
+    dispatch(SendDocument(file))
+
   final protected def dispatch(ev: OperationType): Future[Response.IppResponse] = {
 
     val service = new RequestService("ipp://" + host, requestId = getRequestId)
@@ -63,6 +72,15 @@ class IPPClient(
 
       case GetPrinterAttributes =>
         Source.single(service.getPrinterAttributes(GetPrinterAttributes.operationId))
+
+      case ValidateJob =>
+        Source.single(service.validateJob(ValidateJob.operationId))
+
+      case CreateJob =>
+        Source.single(service.createJob(CreateJob.operationId))
+
+      case SendDocument(file) =>
+        Source.single(service.sendDocument(SendDocument(file).operationId)).concat(file)
 
     }
 

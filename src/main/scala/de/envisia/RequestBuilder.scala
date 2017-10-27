@@ -132,6 +132,30 @@ class RequestBuilder[Request <: RequestBuilder.Request](
         ++ putEnd
     )
 
+  def buildCreateJob(operationId: Byte, requestId: Int) =
+    new IppRequest(
+      putHeader(operationId, requestId)
+        ++ putAttribute("attributes-charset")
+        ++ putAttribute("attributes-natural-language")
+        ++ putAttribute("printer-uri")
+        ++ putAttribute("requesting-user-name")
+        ++ putAttribute("job-name")
+        ++ putAttribute("document-format")
+        ++ putEnd
+    )
+
+  def buildSendDocument(operationId: Byte, requestId: Int) =
+    new IppRequest(
+      putHeader(operationId, requestId)
+        ++ putAttribute("attributes-charset")
+        ++ putAttribute("attributes-natural-language")
+        ++ putAttribute("printer-uri")
+        ++ putAttribute("requesting-user-name")
+        ++ putAttribute("job-name")
+        ++ putAttribute("document-format")
+        ++ putEnd
+    )
+
 }
 
 object RequestBuilder {
@@ -154,8 +178,10 @@ object RequestBuilder {
     //type MinimalRequest = EmptyRequest
     type GetPrinterAttributes = EmptyRequest with Charset with Language with PrinterUri
     type PrintJob             = EmptyRequest with Charset with Language with PrinterUri with User with JobName with Format
-    type ValidateJob          = EmptyRequest
+    type ValidateJob          = EmptyRequest with Charset with Language with PrinterUri with User with JobName with Format
     type GetJobAttributes     = EmptyRequest with Charset with Language with PrinterUri with User with JobId
+    type CreateJob            = EmptyRequest with Charset with Language with PrinterUri with User with JobName with Format
+    type SendDocument         = EmptyRequest with Charset with Language with PrinterUri with User with JobName with Format
 
   }
 

@@ -1,6 +1,5 @@
 package de.envisia.attributes
 
-
 object Attributes {
 
   final val WELL_KNOWN_PORT: Int = 631
@@ -21,7 +20,9 @@ object Attributes {
     "Get-Printer-Attributes" -> 0x0b.toByte,
     "Print-Job"              -> 0x02.toByte,
     "Validate-Job"           -> 0x04.toByte,
-    "Get-Job-Attributes"     -> 0x09.toByte
+    "Get-Job-Attributes"     -> 0x09.toByte,
+    "Create-Job"             -> 0x05.toByte,
+    "Send-Document"          -> 0x06.toByte
   )
 
   final val ATTRIBUTE_TAGS: Map[String, Byte] = Map(
