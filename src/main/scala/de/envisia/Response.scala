@@ -10,11 +10,11 @@ import de.envisia.attributes.Attributes._
 
 import scala.annotation.tailrec
 
-class Response(x: ByteString) {
+class Response(bs: ByteString) {
 
-  def getResponse: IppResponse = {
+  def getResponse(o: OperationType): IppResponse = {
 
-    val bb      = x.asByteBuffer
+    val bb      = bs.asByteBuffer
     val version = Array(bb.get, bb.get)(0)
     println(s"Version: $version")
     val statusCode = bb.getShort
@@ -66,14 +66,14 @@ class Response(x: ByteString) {
       }
     }
 
-    val printerAttrs = parseAttributes(0x01.toByte, Map.empty) //TODO group byte? groupbyte not yet used
+    val attrs = parseAttributes(0x01.toByte, Map.empty) //TODO group byte? groupbyte not yet used
 
-    val result = IppResponse(version, statusCode, requestId, printerAttrs)
+    val result = IppResponse(o.operationId, version, statusCode, requestId, attrs, None)
 
     println(result)
-    println(printerAttrs.size)
-    print("jobstate ..." + printerAttrs("job-state"))
-    print("jobid ..." + printerAttrs("job-id"))
+    println(attrs.size)
+    print("jobstate ..." + attrs("job-state"))
+    print("jobid ..." + attrs("job-id"))
 
     result
   }
@@ -83,10 +83,20 @@ class Response(x: ByteString) {
 object Response {
 
   case class IppResponse(
+      oid: Byte,
       version: Short,
       statusCode: Short,
       requestId: Int,
-      printerAttributes: Map[String, List[String]]
+      attributes: Map[String, List[String]],
+      jobData: Option[JobData]
+  )
+
+  case class JobData(
+      jobID: Int,
+      jobState: Int,
+      jobURI: String,
+      jobStateReasons: List[String],
+      numberOfInterveningJobs: Int
   )
 
 }

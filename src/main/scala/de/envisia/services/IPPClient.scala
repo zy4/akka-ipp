@@ -78,7 +78,7 @@ class IPPClient(
       case resp => Future.failed(new Exception(s"Unexpected status code ${resp.status}"))
     }
 
-    result.map(bs => new Response(bs).getResponse)
+    result.map(bs => new Response(bs).getResponse(ev))
 
   }
 

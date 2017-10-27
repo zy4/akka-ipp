@@ -3,7 +3,11 @@ package de.envisia.attributes
 
 object Attributes {
 
-  final val WELL_KNOWN_PORT = 631
+  final val WELL_KNOWN_PORT: Int = 631
+
+  final val RESERVED: Byte = 0x00.toByte
+
+  final val IPP_VERSION: Byte = 0x02.toByte
 
   final val ATTRIBUTE_GROUPS: Map[String, Byte] = Map(
     "operation-attributes-tag"   -> 0x01.toByte,

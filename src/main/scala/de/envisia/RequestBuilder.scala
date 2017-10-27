@@ -70,8 +70,8 @@ class RequestBuilder[Request <: RequestBuilder.Request](
   // generic byte strings
   @inline protected final def putHeader(operationId: Byte, requestId: Int): ByteString =
     ByteString.newBuilder
-      .putBytes(Array(0x02.toByte, 0x00.toByte))
-      .putBytes(Array(0x00.toByte, operationId))
+      .putBytes(Array(IPP_VERSION, RESERVED))
+      .putBytes(Array(RESERVED, operationId))
       .putInt(requestId) // TODO does not increment
       .putByte(ATTRIBUTE_GROUPS("operation-attributes-tag"))
       .result()
