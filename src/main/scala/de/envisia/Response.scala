@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
 import akka.util.ByteString
-import de.envisia.Response.IppResponse
+import de.envisia.Response.{IppResponse, JobData}
 import de.envisia.util.IppHelper
 import de.envisia.attributes.Attributes._
 
@@ -68,13 +68,24 @@ class Response(bs: ByteString) {
 
     val attrs = parseAttributes(0x01.toByte, Map.empty) //TODO group byte? groupbyte not yet used
 
-    val result = IppResponse(o.operationId, version, statusCode, requestId, attrs, None)
+    val jobData = o.operationId match {
+      case x if x == OPERATION_IDS("Print-Job") =>
+        Some(
+          JobData(
+            attrs("job-id").head.toInt,
+            attrs("job-state").head.toInt,
+            attrs("job-uri").head,
+            attrs("job-state-reasons"),
+            attrs("number-of-intervening-jobs").head.toInt
+          )
+        )
+      case _ => None
+    }
+
+    val result = IppResponse(o.operationId, version, statusCode, requestId, attrs, jobData)
 
     println(result)
     println(attrs.size)
-    print("jobstate ..." + attrs("job-state"))
-    print("jobid ..." + attrs("job-id"))
-
     result
   }
 
@@ -82,7 +93,7 @@ class Response(bs: ByteString) {
 
 object Response {
 
-  case class IppResponse(
+  final case class IppResponse(
       oid: Byte,
       version: Short,
       statusCode: Short,
@@ -91,7 +102,7 @@ object Response {
       jobData: Option[JobData]
   )
 
-  case class JobData(
+  final case class JobData(
       jobID: Int,
       jobState: Int,
       jobURI: String,
