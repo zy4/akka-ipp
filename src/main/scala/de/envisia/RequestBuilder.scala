@@ -100,15 +100,11 @@ class RequestBuilder[T <: RequestBuilder.Request](
     val result = tag match {
 
       case t if t == typeTag[GetPrinterAttributes] => base ++ putEnd
-      case t if t == typeTag[RequestBuilder.Request.PrintJob] =>
+      case t if t == typeTag[RequestBuilder.Request.PrintJob] | t == typeTag[ValidateJob] =>
         base ++
           putAttribute("requesting-user-name") ++
           putAttribute("job-name") ++
           putAttribute("document-format") ++ putEnd
-      case t if t == typeTag[ValidateJob] =>
-        putAttribute("requesting-user-name") ++
-          putAttribute("job-name") ++
-          putAttribute("document-format")
 
       case t if t == typeTag[RequestBuilder.Request.GetJobAttributes] =>
         base ++ putInteger("job-id") ++ putAttribute("requesting-user-name") ++ putEnd
