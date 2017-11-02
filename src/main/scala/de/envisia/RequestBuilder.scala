@@ -67,11 +67,24 @@ class RequestBuilder[T <: RequestBuilder.Request](
       .putShort(attributes(name)._2.length)
       .putBytes(attributes(name)._2.getBytes(StandardCharsets.UTF_8))
       .result()
+
+  /**
+    * method for status polling
+    * @param name
+    * @return
+    */
+  @inline protected final def putInteger(name: String): ByteString =
+    ByteString.newBuilder
+      .putByte(attributes(name)._1)
+      .putShort(name.length)
+      .putBytes(name.getBytes(StandardCharsets.UTF_8))
+      .putShort(4) // TODO should forever remain at 4, right?
+      .putInt(attributes(name)._2.toInt)
+      .result()
   @inline protected val putEnd: ByteString =
     ByteString.newBuilder
       .putByte(ATTRIBUTE_GROUPS("end-of-attributes-tag"))
       .result()
-
 
   // TODO try to replace reflection with the AUX pattern if possible
 
@@ -97,8 +110,8 @@ class RequestBuilder[T <: RequestBuilder.Request](
           putAttribute("job-name") ++
           putAttribute("document-format")
 
-      case t if t == typeTag[GetJobAttributes] =>
-        base ++ putAttribute("job-id") ++ putAttribute("requesting-user-name") ++ putEnd
+      case t if t == typeTag[RequestBuilder.Request.GetJobAttributes] =>
+        base ++ putInteger("job-id") ++ putAttribute("requesting-user-name") ++ putEnd
 
       case t if t == typeTag[CreateJob] =>
         base ++ putAttribute("requesting-user-name") ++ putAttribute("job-name") ++
@@ -109,9 +122,7 @@ class RequestBuilder[T <: RequestBuilder.Request](
       case _ => throw new WrongRequestType("Wrong Request Type")
 
     }
-
     new IppRequest(result)
-
   }
 
 }

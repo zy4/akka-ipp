@@ -48,12 +48,6 @@ class Response(bs: ByteString) {
         // value
         val shortLenValue = bb.getShort()
 
-        /* val value =
-          case class Attribute(array: Array[Byte]) {
-            def getInt: Int = ByteBuffer.wrap(array).getInt()
-            def getString: String = new String(array, StandardCharsets.UTF_8)
-          } */
-
         val value = attrTag match {
           case b if !NUMERIC_TAGS.contains(b) =>
             new String(IppHelper.fromBuffer(bb, shortLenValue), StandardCharsets.UTF_8)

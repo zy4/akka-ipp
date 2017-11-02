@@ -30,7 +30,7 @@ class RequestService(
       .setLanguage(lang)
       .askWithJobId(jobId)
       .setUser(user)
-      .build[GetJobAttributes](operationId, requestId)
+      .build[RequestBuilder.Request.GetJobAttributes](operationId, requestId)
       .request
 
   def printJob(operationId: Byte): ByteString =

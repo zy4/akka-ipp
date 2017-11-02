@@ -11,6 +11,10 @@ lazy val root = (project in file("."))
 scalacOptions := Seq(
   "-unchecked",
   "-feature",
+  "-language:implicitConversions",
+  "-language:higherKinds",
+  "-language:existentials",
+  "-language:postfixOps",
   "-deprecation",
   "-encoding",
   "utf8"
