@@ -2,7 +2,7 @@ package de.envisia.status
 
 object IppExceptions {
 
-  case class CustomException(private val message: String = "",
+  case class WrongRequestType(private val message: String = "Wrong Request Type",
       private val cause: Throwable = None.orNull)
       extends Exception(message, cause)
 

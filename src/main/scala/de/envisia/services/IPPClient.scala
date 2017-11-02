@@ -26,15 +26,6 @@ class IPPClient(
     mat: Materializer
 ) extends HttpRequestService {
 
-  /*def poll() = {
-
-    Future {
-    mat.scheduleOnce(5.seconds, () => {
-      poll()
-    })
-    }
-  } */
-
   private val atomicInt = new AtomicInteger(0)
 
   private def getRequestId: Int =
@@ -61,6 +52,9 @@ class IPPClient(
   def sendDocument(file: Source[ByteString, Future[IOResult]]): Future[Response.IppResponse] =
     dispatch(SendDocument(file))
 
+  def getJobAttributes(jobId: Int): Future[Response.IppResponse] =
+    dispatch(GetJobAttributes(jobId))
+
   final protected def dispatch(ev: OperationType): Future[Response.IppResponse] = {
 
     val service = new RequestService("ipp://" + host, requestId = getRequestId)
@@ -81,6 +75,9 @@ class IPPClient(
 
       case SendDocument(file) =>
         Source.single(service.sendDocument(SendDocument(file).operationId)).concat(file)
+
+      case GetJobAttributes(jobId) =>
+        Source.single(service.getJobAttributes(GetJobAttributes(jobId).operationId, jobId))
 
     }
 

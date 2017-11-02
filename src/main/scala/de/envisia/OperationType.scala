@@ -19,7 +19,7 @@ case object ValidateJob extends OperationType("Validate-Job", OPERATION_IDS("Val
 
 case object CreateJob extends OperationType("Create-Job", OPERATION_IDS("Create-Job"))
 
-case object GetJobAttributes extends OperationType("Get-Job-Attributes", OPERATION_IDS("Get-Job-Attributes"))
+case class GetJobAttributes(jobId: Int) extends OperationType("Get-Job-Attributes", OPERATION_IDS("Get-Job-Attributes"))
 
 case class SendDocument(file: Source[ByteString, Future[IOResult]])
     extends OperationType("Send-Document", OPERATION_IDS("Send-Document"))

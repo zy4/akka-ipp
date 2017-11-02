@@ -2,70 +2,54 @@ package de.envisia
 
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
+
 import de.envisia.attributes.Attributes._
 import akka.util.ByteString
+import de.envisia.status.IppExceptions.WrongRequestType
+import de.envisia.RequestBuilder.Request._
 
 final class IppRequest(val request: ByteString) extends AnyVal
 
-class RequestBuilder[Request <: RequestBuilder.Request](
+class RequestBuilder[T <: RequestBuilder.Request](
     attributes: Map[String, (Byte, String)] = Map.empty[String, (Byte, String)]
 ) {
-
-  import de.envisia.RequestBuilder.Request._
 
   implicit val bO: ByteOrder = ByteOrder.BIG_ENDIAN
 
   /**
     * common setters
     */
-  def setCharset(charset: String): RequestBuilder[Request with Charset] =
+  def setCharset(charset: String): RequestBuilder[T with Charset] =
     new RequestBuilder(attributes + ("attributes-charset" -> (ATTRIBUTE_TAGS("attributes-charset"), charset)))
 
-  def setUri(uri: String): RequestBuilder[Request with PrinterUri] =
+  def setUri(uri: String): RequestBuilder[T with PrinterUri] =
     new RequestBuilder(attributes + ("printer-uri" -> (ATTRIBUTE_TAGS("printer-uri"), uri)))
 
-  def setLanguage(lang: String): RequestBuilder[Request with Language] =
+  def setLanguage(lang: String): RequestBuilder[T with Language] =
     new RequestBuilder(
       attributes + ("attributes-natural-language" -> (ATTRIBUTE_TAGS("attributes-natural-language"), lang))
     )
 
-  def setUser(user: String): RequestBuilder[Request with User] =
+  def setUser(user: String): RequestBuilder[T with User] =
     new RequestBuilder(attributes + ("requesting-user-name" -> (ATTRIBUTE_TAGS("requesting-user-name"), user)))
 
-  def setJobName(jobName: String): RequestBuilder[Request with JobName] =
+  def setJobName(jobName: String): RequestBuilder[T with JobName] =
     new RequestBuilder(attributes + ("job-name" -> (ATTRIBUTE_TAGS("job-name"), jobName)))
 
-  def setFormat(format: String): RequestBuilder[Request with Format] =
+  def setFormat(format: String): RequestBuilder[T with Format] =
     new RequestBuilder(attributes + ("document-format" -> (ATTRIBUTE_TAGS("document-format"), format)))
 
-  def askWithJobId(jobId: Int): RequestBuilder[Request with JobId] =
+  def askWithJobId(jobId: Int): RequestBuilder[T with JobId] =
     new RequestBuilder(attributes + ("job-id" -> (ATTRIBUTE_TAGS("job-id"), jobId.toString)))
 
   /**
     *  more general setters
     */
-  def addOperationAttribute(tag: Byte, name: String, value: String): RequestBuilder[Request with OperationAttribute] =
-    new RequestBuilder[Request with OperationAttribute](attributes + (name -> (tag, value)))
+  def addOperationAttribute(tag: Byte, name: String, value: String): RequestBuilder[T with OperationAttribute] =
+    new RequestBuilder[T with OperationAttribute](attributes + (name -> (tag, value)))
 
-  def addJobAttribute(tag: Byte, name: String, value: String): RequestBuilder[Request with JobAttribute] =
-    new RequestBuilder[Request with JobAttribute](attributes + (name -> (tag, value)))
-
-  //http://tools.ietf.org/html/rfc2910#section-3.1.1
-  //	-----------------------------------------------
-  //	|                  version-number             |   2 bytes  - required
-  //	-----------------------------------------------
-  //	|               operation-id (request)        |
-  //	|                      or                     |   2 bytes  - required
-  //	|               status-code (response)        |
-  //	-----------------------------------------------
-  //	|                   request-id                |   4 bytes  - required
-  //	-----------------------------------------------
-  //	|                 attribute-group             |   n bytes - 0 or more
-  //	-----------------------------------------------
-  //	|              end-of-attributes-tag          |   1 byte   - required
-  //	-----------------------------------------------
-  //	|                     data                    |   q bytes  - optional
-  //	-----------------------------------------------
+  def addJobAttribute(tag: Byte, name: String, value: String): RequestBuilder[T with JobAttribute] =
+    new RequestBuilder[T with JobAttribute](attributes + (name -> (tag, value)))
 
   // generic byte strings
   @inline protected final def putHeader(operationId: Byte, requestId: Int): ByteString =
@@ -88,73 +72,47 @@ class RequestBuilder[Request <: RequestBuilder.Request](
       .putByte(ATTRIBUTE_GROUPS("end-of-attributes-tag"))
       .result()
 
-  def buildGetPrinterAttr(operationId: Byte, requestId: Int)(
-      implicit ev: Request =:= GetPrinterAttributes
-  ): IppRequest = new IppRequest(
-    putHeader(operationId, requestId)
-      ++ putAttribute("attributes-charset")
-      ++ putAttribute("attributes-natural-language")
-      ++ putAttribute("printer-uri") ++ putEnd
-  )
 
-  def buildPrintJob(operationId: Byte, requestId: Int)(implicit ev: Request =:= PrintJob): IppRequest = new IppRequest(
-    putHeader(operationId, requestId)
-      ++ putAttribute("attributes-charset")
-      ++ putAttribute("attributes-natural-language")
-      ++ putAttribute("printer-uri")
-      ++ putAttribute("requesting-user-name")
-      ++ putAttribute("job-name")
-      ++ putAttribute("document-format")
-      ++ putEnd
-  )
+  // TODO try to replace reflection with the AUX pattern if possible
 
-  def buildValidateJob(operationId: Byte, requestId: Int)(implicit ev: Request =:= ValidateJob): IppRequest =
-    new IppRequest(
-      putHeader(operationId, requestId)
-        ++ putAttribute("attributes-charset")
-        ++ putAttribute("attributes-natural-language")
-        ++ putAttribute("printer-uri")
-        ++ putAttribute("requesting-user-name")
-        ++ putAttribute("job-name")
-        ++ putAttribute("document-format")
-        ++ putEnd
-    )
+  import scala.reflect.runtime.universe._
 
-  def buildGetJobAttr(operationId: Byte, requestId: Int)(implicit ev: Request =:= GetJobAttributes): IppRequest =
-    new IppRequest(
-      putHeader(operationId, requestId)
-        ++ putAttribute("attributes-charset")
-        ++ putAttribute("attributes-natural-language")
-        ++ putAttribute("printer-uri")
-        ++ putAttribute("job-id")
-        ++ putAttribute("requesting-user-name")
-      // ++ putAttribute("requested-attributes") // optionally https://tools.ietf.org/html/rfc2911#section-3.2.5.1
-        ++ putEnd
-    )
+  def build[A](oid: Byte, reqId: Int)(implicit tag: TypeTag[A]): IppRequest = {
 
-  def buildCreateJob(operationId: Byte, requestId: Int) =
-    new IppRequest(
-      putHeader(operationId, requestId)
-        ++ putAttribute("attributes-charset")
-        ++ putAttribute("attributes-natural-language")
-        ++ putAttribute("printer-uri")
-        ++ putAttribute("requesting-user-name")
-        ++ putAttribute("job-name")
-        ++ putAttribute("document-format")
-        ++ putEnd
-    )
+    val base = putHeader(oid, reqId) ++
+      putAttribute("attributes-charset") ++
+      putAttribute("attributes-natural-language") ++
+      putAttribute("printer-uri")
 
-  def buildSendDocument(operationId: Byte, requestId: Int) =
-    new IppRequest(
-      putHeader(operationId, requestId)
-        ++ putAttribute("attributes-charset")
-        ++ putAttribute("attributes-natural-language")
-        ++ putAttribute("printer-uri")
-        ++ putAttribute("requesting-user-name")
-        ++ putAttribute("job-name")
-        ++ putAttribute("document-format")
-        ++ putEnd
-    )
+    val result = tag match {
+
+      case t if t == typeTag[GetPrinterAttributes] => base ++ putEnd
+      case t if t == typeTag[RequestBuilder.Request.PrintJob] =>
+        base ++
+          putAttribute("requesting-user-name") ++
+          putAttribute("job-name") ++
+          putAttribute("document-format") ++ putEnd
+      case t if t == typeTag[ValidateJob] =>
+        putAttribute("requesting-user-name") ++
+          putAttribute("job-name") ++
+          putAttribute("document-format")
+
+      case t if t == typeTag[GetJobAttributes] =>
+        base ++ putAttribute("job-id") ++ putAttribute("requesting-user-name") ++ putEnd
+
+      case t if t == typeTag[CreateJob] =>
+        base ++ putAttribute("requesting-user-name") ++ putAttribute("job-name") ++
+          putAttribute("document-format") ++ putEnd
+      case t if t == typeTag[SendDocument] =>
+        base ++ putAttribute("requesting-user-name") ++
+          putAttribute("job-name") ++ putAttribute("document-format") ++ putEnd
+      case _ => throw new WrongRequestType("Wrong Request Type")
+
+    }
+
+    new IppRequest(result)
+
+  }
 
 }
 

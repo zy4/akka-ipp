@@ -2,6 +2,7 @@ package de.envisia.services
 
 import akka.util.ByteString
 import de.envisia.RequestBuilder
+import de.envisia.RequestBuilder.Request._
 import de.envisia.attributes.Attributes._
 
 class RequestService(
@@ -15,65 +16,65 @@ class RequestService(
 ) {
 
   def getPrinterAttributes(operationId: Byte): ByteString =
-    new RequestBuilder[RequestBuilder.Request.GetPrinterAttributes]()
+    new RequestBuilder[GetPrinterAttributes]()
       .setCharset(charset)
       .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/print")
       .setLanguage(lang)
-      .buildGetPrinterAttr(operationId, requestId)
+      .build[GetPrinterAttributes](operationId, requestId)
       .request
 
   def getJobAttributes(operationId: Byte, jobId: Int): ByteString =
-    new RequestBuilder[RequestBuilder.Request.GetJobAttributes]()
+    new RequestBuilder[GetJobAttributes]()
       .setCharset(charset)
       .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/print")
       .setLanguage(lang)
       .askWithJobId(jobId)
       .setUser(user)
-      .buildGetJobAttr(operationId, requestId)
+      .build[GetJobAttributes](operationId, requestId)
       .request
 
   def printJob(operationId: Byte): ByteString =
-    new RequestBuilder[RequestBuilder.Request.PrintJob]()
+    new RequestBuilder[PrintJob]()
       .setCharset(charset)
       .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/print")
       .setLanguage(lang)
       .setUser(user)
       .setJobName(jobName)
       .setFormat(format)
-      .buildPrintJob(operationId, requestId)
+      .build[RequestBuilder.Request.PrintJob](operationId, requestId)
       .request
 
   def validateJob(operationId: Byte): ByteString =
-    new RequestBuilder[RequestBuilder.Request.ValidateJob]()
+    new RequestBuilder[ValidateJob]()
       .setCharset(charset)
       .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/print")
       .setLanguage(lang)
       .setUser(user)
       .setJobName(jobName)
       .setFormat(format)
-      .buildValidateJob(operationId, requestId)
+      .build[ValidateJob](operationId, requestId)
       .request
 
   def createJob(operationId: Byte): ByteString =
-    new RequestBuilder[RequestBuilder.Request.CreateJob]()
+    new RequestBuilder[CreateJob]()
       .setCharset(charset)
       .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/print")
       .setLanguage(lang)
       .setUser(user)
       .setJobName(jobName)
       .setFormat(format)
-      .buildCreateJob(operationId, requestId)
+      .build[CreateJob](operationId, requestId)
       .request
 
   def sendDocument(operationId: Byte): ByteString =
-    new RequestBuilder[RequestBuilder.Request.SendDocument]()
+    new RequestBuilder[SendDocument]()
       .setCharset(charset)
       .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/print")
       .setLanguage(lang)
       .setUser(user)
       .setJobName(jobName)
       .setFormat(format)
-      .buildSendDocument(operationId, requestId)
+      .build[SendDocument](operationId, requestId)
       .request
 
 }
