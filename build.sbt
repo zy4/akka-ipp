@@ -16,6 +16,8 @@ scalacOptions := Seq(
   "utf8"
 )
 
+publishTo := Some("envisia-nexus" at "https://nexus.envisia.de/repository/internal/")
+
 releasePublishArtifactsAction := PgpKeys.publishSigned.value
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,              // : ReleaseStep
