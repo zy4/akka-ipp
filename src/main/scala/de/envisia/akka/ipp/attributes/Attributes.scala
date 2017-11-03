@@ -1,4 +1,4 @@
-package de.envisia.attributes
+package de.envisia.akka.ipp.attributes
 
 object Attributes {
 

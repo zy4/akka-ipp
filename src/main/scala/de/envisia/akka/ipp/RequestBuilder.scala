@@ -1,12 +1,12 @@
-package de.envisia
+package de.envisia.akka.ipp
 
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
 
-import de.envisia.attributes.Attributes._
 import akka.util.ByteString
-import de.envisia.status.IppExceptions.WrongRequestType
-import de.envisia.RequestBuilder.Request._
+import de.envisia.akka.ipp.RequestBuilder.Request._
+import de.envisia.akka.ipp.attributes.Attributes._
+import de.envisia.akka.ipp.status.IppExceptions.WrongRequestType
 
 final class IppRequest(val request: ByteString) extends AnyVal
 
@@ -69,7 +69,7 @@ class RequestBuilder[T <: RequestBuilder.Request](
       .result()
 
   /**
-    * method for status polling
+    * method for inserting the jobId
     * @param name
     * @return
     */
@@ -112,7 +112,7 @@ class RequestBuilder[T <: RequestBuilder.Request](
       case t if t == typeTag[CreateJob] =>
         base ++ putAttribute("requesting-user-name") ++ putAttribute("job-name") ++
           putAttribute("document-format") ++ putEnd
-      case t if t == typeTag[SendDocument] =>
+      case t if t == typeTag[RequestBuilder.Request.SendDocument] =>
         base ++ putAttribute("requesting-user-name") ++
           putAttribute("job-name") ++ putAttribute("document-format") ++ putEnd
       case _ => throw new WrongRequestType("Wrong Request Type")

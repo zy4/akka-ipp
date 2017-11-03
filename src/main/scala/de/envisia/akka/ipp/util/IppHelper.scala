@@ -1,4 +1,4 @@
-package de.envisia.util
+package de.envisia.akka.ipp.util
 
 import java.nio.ByteBuffer
 

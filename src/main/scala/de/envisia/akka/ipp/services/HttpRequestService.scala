@@ -1,4 +1,4 @@
-package de.envisia.services
+package de.envisia.akka.ipp.services
 
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 

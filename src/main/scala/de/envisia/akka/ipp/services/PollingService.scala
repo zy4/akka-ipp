@@ -1,10 +1,10 @@
-package de.envisia.services
+package de.envisia.akka.ipp.services
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
 import akka.stream.Materializer
-import de.envisia.Response
+import de.envisia.akka.ipp.Response
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }

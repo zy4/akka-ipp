@@ -1,12 +1,12 @@
-package de.envisia
+package de.envisia.akka.ipp
 
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
 import akka.util.ByteString
-import de.envisia.Response.{IppResponse, JobData}
-import de.envisia.util.IppHelper
-import de.envisia.attributes.Attributes._
+import de.envisia.akka.ipp.Response.{ IppResponse, JobData }
+import de.envisia.akka.ipp.attributes.Attributes._
+import de.envisia.akka.ipp.util.IppHelper
 
 import scala.annotation.tailrec
 

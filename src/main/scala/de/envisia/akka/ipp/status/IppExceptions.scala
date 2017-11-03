@@ -1,4 +1,4 @@
-package de.envisia.status
+package de.envisia.akka.ipp.status
 
 object IppExceptions {
 

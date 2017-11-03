@@ -1,4 +1,4 @@
-package de.envisia.services
+package de.envisia.akka.ipp.services
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -7,12 +7,12 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.MediaType.NotCompressible
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.{IOResult, Materializer}
+import akka.stream.{ IOResult, Materializer }
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import de.envisia._
+import de.envisia.akka.ipp._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 class IPPClient(
     prefix: String,
