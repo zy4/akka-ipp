@@ -1,9 +1,9 @@
 package de.envisia.akka.ipp.services
 
 import akka.util.ByteString
-import de.envisia.akka.ipp.RequestBuilder
-import de.envisia.akka.ipp.RequestBuilder.Request._
+import de.envisia.akka.ipp.request.RequestBuilder.Request._
 import de.envisia.akka.ipp.attributes.Attributes._
+import de.envisia.akka.ipp.request.RequestBuilder
 
 class RequestService(
     uri: String,

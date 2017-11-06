@@ -13,7 +13,6 @@ import scala.annotation.tailrec
 class Response(bs: ByteString) {
 
   def getResponse(o: OperationType): IppResponse = {
-
     val bb      = bs.asByteBuffer
     val version = Array(bb.get, bb.get)(0)
     println(s"Version: $version")

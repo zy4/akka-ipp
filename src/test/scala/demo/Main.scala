@@ -27,7 +27,7 @@ object Main {
     //val printJob = client.printJob(FileIO.fromPath(Paths.get("examples/pdf-sample.pdf")))
     //Await.result(printJob, 10.seconds)
 
-     val jobs = for (i <- 1 to 2) yield {
+    val jobs = for (i <- 1 to 2) yield {
       if (i % 10 == 0)
         Thread.sleep(200)
       client.printerAttributes()
