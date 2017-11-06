@@ -39,7 +39,7 @@ class RequestSerializer(attributes: Map[String, (Byte, String)] = Map.empty[Stri
       .putByte(attributes(name)._1)
       .putShort(name.length)
       .putBytes(name.getBytes(StandardCharsets.UTF_8))
-      .putShort(4) // TODO should forever remain at 4, right?
+      .putShort(4) // MAX INT
       .putInt(attributes(name)._2.toInt)
       .result()
   @inline protected[request] val putEnd: ByteString =
