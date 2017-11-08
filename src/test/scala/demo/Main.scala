@@ -1,11 +1,12 @@
 package demo
 
-import java.nio.file.Paths
+import java.nio.file.{ Files, Paths }
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.scaladsl.FileIO
 import akka.stream.{ ActorMaterializer, Materializer }
+import akka.util.ByteString
 import de.envisia.akka.ipp.attributes.Attributes._
 import de.envisia.akka.ipp.services.IPPClient
 
@@ -24,16 +25,25 @@ object Main {
     val client =
       new IPPClient("http", "192.168.179.149", WELL_KNOWN_PORT, "", Some(""), Some(""))(actorSystem, mat)
 
-    //val printJob = client.printJob(FileIO.fromPath(Paths.get("examples/pdf-sample.pdf")))
-    //Await.result(printJob, 10.seconds)
+    //val test = FileIO.fromPath(Paths.get("examples/pdf-sample.pdf")).map { x =>
 
-    val jobs = for (i <- 1 to 2) yield {
+      val x = ByteString(Files.readAllBytes(Paths.get("examples/pdf-sample.pdf")))
+      val printJob = client.printJob(x)
+      Await.result(printJob, 10.seconds)
+
+    //}
+
+    //println(test)
+
+
+   /* val jobs = for (i <- 1 to 2) yield {
       if (i % 10 == 0)
         Thread.sleep(200)
       client.printerAttributes()
     }
 
     Await.ready(Future.sequence(jobs), 10.minutes)
+ */
 
 
     //val checkJob = client.getJobAttributes(5555555)

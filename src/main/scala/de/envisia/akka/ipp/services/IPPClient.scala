@@ -37,8 +37,8 @@ class IPPClient(
 
   private val ippContentType = ContentType(MediaType.customBinary("application", "ipp", NotCompressible))
 
-  def printJob(file: Source[ByteString, Future[IOResult]]): Future[Response.IppResponse] =
-    dispatch(PrintJob(file))
+  def printJob(data: ByteString): Future[Response.IppResponse] =
+    dispatch(PrintJob(data))
 
   def printerAttributes(): Future[Response.IppResponse] =
     dispatch(GetPrinterAttributes)
@@ -61,8 +61,8 @@ class IPPClient(
 
     val body = ev match {
 
-      case PrintJob(file) =>
-        Source.single(service.printJob(PrintJob(file).operationId)).concat(file)
+      case PrintJob(data) =>
+        Source.single(service.printJob(PrintJob(data).operationId, data))
 
       case GetPrinterAttributes =>
         Source.single(service.getPrinterAttributes(GetPrinterAttributes.operationId))

@@ -33,7 +33,7 @@ class RequestService(
       .build[RequestBuilder.Request.GetJobAttributes](operationId, requestId)
       .request
 
-  def printJob(operationId: Byte): ByteString =
+  def printJob(operationId: Byte, data: ByteString): ByteString =
     new RequestBuilder[PrintJob]()
       .setCharset(charset)
       .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/print")
@@ -42,7 +42,7 @@ class RequestService(
       .setJobName(jobName)
       .setFormat(format)
       .build[RequestBuilder.Request.PrintJob](operationId, requestId)
-      .request
+      .request ++ data
 
   def validateJob(operationId: Byte): ByteString =
     new RequestBuilder[ValidateJob]()

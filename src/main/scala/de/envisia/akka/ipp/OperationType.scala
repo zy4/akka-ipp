@@ -12,7 +12,7 @@ sealed abstract class OperationType(val name: String, val operationId: Byte)
 case object GetPrinterAttributes
     extends OperationType("Get-Printer-Attributes", OPERATION_IDS("Get-Printer-Attributes"))
 
-case class PrintJob(file: Source[ByteString, Future[IOResult]])
+case class PrintJob(data: ByteString)
     extends OperationType("Print-Job", OPERATION_IDS("Print-Job"))
 
 case object ValidateJob extends OperationType("Validate-Job", OPERATION_IDS("Validate-Job"))
