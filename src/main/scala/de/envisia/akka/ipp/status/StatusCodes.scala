@@ -54,7 +54,8 @@ object StatusCodes {
     "server-error-too-many-documents"                   -> 0x050C.toByte
   )
 
-  final def getStatusMessage(statusCode: Byte): Option[String] =
-    STATUS_CODES.map(_.swap).get(statusCode)
+  val reverseCodes: Map[Byte, String] = for ((k,v) <- STATUS_CODES) yield (v, k)
 
+  final def getStatusMessage(statusCode: Byte): Option[String] = reverseCodes.get(statusCode)
+  
 }
