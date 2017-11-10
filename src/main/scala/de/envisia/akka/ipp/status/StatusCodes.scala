@@ -57,5 +57,5 @@ object StatusCodes {
   val reverseCodes: Map[Byte, String] = for ((k,v) <- STATUS_CODES) yield (v, k)
 
   final def getStatusMessage(statusCode: Byte): Option[String] = reverseCodes.get(statusCode)
-  
+
 }

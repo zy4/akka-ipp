@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
 import akka.util.ByteString
-import de.envisia.akka.ipp.Response.{ IppResponse, JobData }
+import de.envisia.akka.ipp.Response.{IppResponse, JobData}
 import de.envisia.akka.ipp.attributes.Attributes._
 import de.envisia.akka.ipp.util.IppHelper
 
@@ -63,6 +63,16 @@ class Response(bs: ByteString) {
 
     val jobData = o.operationId match {
       case x if x == OPERATION_IDS("Print-Job") =>
+        Some(
+          JobData(
+            attrs("job-id").head.toInt,
+            attrs("job-state").head.toInt,
+            attrs("job-uri").head,
+            attrs("job-state-reasons"),
+            attrs("number-of-intervening-jobs").head.toInt
+          )
+        )
+      case x if x == OPERATION_IDS("Get-Job-Attributes") =>
         Some(
           JobData(
             attrs("job-id").head.toInt,
