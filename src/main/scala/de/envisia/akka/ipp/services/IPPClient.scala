@@ -7,12 +7,12 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.MediaType.NotCompressible
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.{ IOResult, Materializer }
+import akka.stream.{IOResult, Materializer}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import de.envisia.akka.ipp._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 class IPPClient(
     prefix: String,
@@ -54,9 +54,11 @@ class IPPClient(
   def getJobAttributes(jobId: Int): Future[Response.IppResponse] =
     dispatch(GetJobAttributes(jobId))
 
+  def poll(jobId: Int): Future[String] = new PollingService(jobId, this).poll().asInstanceOf[Future[String]]
+
   final protected def dispatch(ev: OperationType): Future[Response.IppResponse] = {
 
-    val service = new RequestService("ipp://" + host, queue=queue, requestId = getRequestId)
+    val service = new RequestService("ipp://" + host, queue = queue, requestId = getRequestId)
 
     val body = ev match {
 
@@ -76,6 +78,7 @@ class IPPClient(
         Source.single(service.sendDocument(SendDocument(file).operationId)).concat(file)
 
       case GetJobAttributes(jobId) =>
+        println("GetJobAttributes")
         Source.single(service.getJobAttributes(GetJobAttributes(jobId).operationId, jobId))
 
     }

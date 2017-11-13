@@ -1,31 +1,21 @@
 package de.envisia.akka.ipp.services
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
-import akka.stream.Materializer
-import de.envisia.akka.ipp.Response
+import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.{ Materializer, SourceShape }
 
-import scala.concurrent.duration._
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 
-class PollingService()(implicit actorSystem: ActorSystem, mat: Materializer) extends HttpRequestService {
-
-  override implicit val ec: ExecutionContext = actorSystem.dispatcher
+class PollingService(jobId: Int, client: IPPClient)(
+    implicit actorSystem: ActorSystem,
+    mat: Materializer
+) {
 
 
+  def poll(): Future[java.io.Serializable] = {
 
-  def poll(jobId: Int) = {
-
-    Future {
-      mat.scheduleOnce(5.seconds, () => {
-
-
-      })
-    }
+    Source.fromGraph(new JobStateSource(jobId, client)).runWith(Sink.head)
 
   }
 
-
-  override def execute(request: HttpRequest): Future[HttpResponse] = Http().singleRequest(request)
 }
