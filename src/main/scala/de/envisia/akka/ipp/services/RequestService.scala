@@ -9,6 +9,7 @@ class RequestService(
     uri: String,
     lang: String = "en-us",
     user: String = "dummy",
+    queue: String,
     jobName: String = "",
     charset: String = "utf-8",
     format: String = "application/octet-stream",
@@ -18,7 +19,7 @@ class RequestService(
   def getPrinterAttributes(operationId: Byte): ByteString =
     new RequestBuilder[GetPrinterAttributes]()
       .setCharset(charset)
-      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/print")
+      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
       .setLanguage(lang)
       .build[GetPrinterAttributes](operationId, requestId)
       .request
@@ -26,7 +27,7 @@ class RequestService(
   def getJobAttributes(operationId: Byte, jobId: Int): ByteString =
     new RequestBuilder[GetJobAttributes]()
       .setCharset(charset)
-      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/print")
+      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
       .setLanguage(lang)
       .askWithJobId(jobId)
       .setUser(user)
@@ -36,7 +37,7 @@ class RequestService(
   def printJob(operationId: Byte, data: ByteString): ByteString =
     new RequestBuilder[PrintJob]()
       .setCharset(charset)
-      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/print")
+      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
       .setLanguage(lang)
       .setUser(user)
       .setJobName(jobName)
@@ -47,7 +48,7 @@ class RequestService(
   def validateJob(operationId: Byte): ByteString =
     new RequestBuilder[ValidateJob]()
       .setCharset(charset)
-      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/print")
+      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
       .setLanguage(lang)
       .setUser(user)
       .setJobName(jobName)
@@ -58,7 +59,7 @@ class RequestService(
   def createJob(operationId: Byte): ByteString =
     new RequestBuilder[CreateJob]()
       .setCharset(charset)
-      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/print")
+      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
       .setLanguage(lang)
       .setUser(user)
       .setJobName(jobName)
@@ -69,7 +70,7 @@ class RequestService(
   def sendDocument(operationId: Byte): ByteString =
     new RequestBuilder[SendDocument]()
       .setCharset(charset)
-      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/print")
+      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
       .setLanguage(lang)
       .setUser(user)
       .setJobName(jobName)

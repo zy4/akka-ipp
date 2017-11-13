@@ -18,9 +18,8 @@ class IPPClient(
     prefix: String,
     host: String,
     port: Int,
-    queue: String, // ????
-    username: Option[String],
-    password: Option[String]
+    queue: String = "print",
+    username: Option[String]
 )(
     implicit actorSystem: ActorSystem,
     mat: Materializer
@@ -57,7 +56,7 @@ class IPPClient(
 
   final protected def dispatch(ev: OperationType): Future[Response.IppResponse] = {
 
-    val service = new RequestService("ipp://" + host, requestId = getRequestId)
+    val service = new RequestService("ipp://" + host, queue=queue, requestId = getRequestId)
 
     val body = ev match {
 

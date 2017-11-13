@@ -22,20 +22,20 @@ object Main {
     implicit val executionContext: ExecutionContext = actorSystem.dispatcher
 
     val client =
-      new IPPClient("http", "192.168.179.149", WELL_KNOWN_PORT, "", Some(""), Some(""))(actorSystem, mat)
+      new IPPClient("http", "192.168.179.149", WELL_KNOWN_PORT, "print", Some(""))(actorSystem, mat)
 
-    val x        = ByteString(Files.readAllBytes(Paths.get("examples/pdf-sample.pdf")))
-    val printJob = client.printJob(x)
-    Await.result(printJob, 10.seconds)
+    //val x        = ByteString(Files.readAllBytes(Paths.get("examples/pdf-sample.pdf")))
+    //val printJob = client.printJob(x)
+    //Await.result(printJob, 10.seconds)
 
-    /* val jobs = for (i <- 1 to 2) yield {
+     val jobs = for (i <- 1 to 2) yield {
       if (i % 10 == 0)
         Thread.sleep(200)
       client.printerAttributes()
     }
 
     Await.ready(Future.sequence(jobs), 10.minutes)
-     */
+
 
     //val checkJob = client.getJobAttributes(71)
     //Await.result(checkJob, 10.seconds)
