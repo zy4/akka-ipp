@@ -7,12 +7,14 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.MediaType.NotCompressible
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.{IOResult, Materializer}
+import akka.stream.{ IOResult, Materializer }
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
+import de.envisia.akka.ipp.Response.{ GetJobAttributesResponse, GetPrinterAttributesResponse, IppResponse, PrintJobResponse }
 import de.envisia.akka.ipp._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.reflect.runtime.universe._
+import scala.concurrent.{ ExecutionContext, Future }
 
 class IPPClient(
     prefix: String,
@@ -36,27 +38,33 @@ class IPPClient(
 
   private val ippContentType = ContentType(MediaType.customBinary("application", "ipp", NotCompressible))
 
-  def printJob(data: ByteString): Future[Response.IppResponse] =
-    dispatch(PrintJob(data))
+  def printJob(data: ByteString): Future[PrintJobResponse] =
+    dispatch(PrintJob(data)) match {
+      case x: Future[PrintJobResponse] => x // TODO eliminated by erasure
+      case _ => throw new IllegalStateException("expected PrintJobResponse")
+    }
 
-  def printerAttributes(): Future[Response.IppResponse] =
-    dispatch(GetPrinterAttributes)
+  def printerAttributes(): Future[GetPrinterAttributesResponse] =
+    dispatch(GetPrinterAttributes) match {
+      case x: Future[PrintJobResponse] => x // TODO eliminated by erasure
+      case _ => throw new IllegalStateException("expected GetPrinterAttributesResponse")
+    }
 
-  def validateJob(): Future[Response.IppResponse] =
+  def validateJob(): Future[_] =
     dispatch(ValidateJob)
 
-  def createJob(): Future[Response.IppResponse] =
+  def createJob(): Future[_] =
     dispatch(CreateJob)
 
-  def sendDocument(file: Source[ByteString, Future[IOResult]]): Future[Response.IppResponse] =
+  def sendDocument(file: Source[ByteString, Future[IOResult]]): Future[_] =
     dispatch(SendDocument(file))
 
-  def getJobAttributes(jobId: Int): Future[Response.IppResponse] =
-    dispatch(GetJobAttributes(jobId))
+  def getJobAttributes[T <: IppResponse](jobId: Int): Future[GetJobAttributesResponse] =
+    dispatch[GetJobAttributesResponse](GetJobAttributes(jobId))
 
   def poll(jobId: Int): Future[String] = new PollingService(jobId, this).poll().asInstanceOf[Future[String]]
 
-  final protected def dispatch(ev: OperationType): Future[Response.IppResponse] = {
+  final protected def dispatch[A <: IppResponse](ev: OperationType): Future[A] = {
 
     val service = new RequestService("ipp://" + host, queue = queue, requestId = getRequestId)
 
@@ -95,7 +103,7 @@ class IPPClient(
       case resp => Future.failed(new Exception(s"Unexpected status code ${resp.status}"))
     }
 
-    result.map(bs => new Response(bs).getResponse(ev))
+    result.map(bs => new Response(bs).getResponse[A](ev))
 
   }
 

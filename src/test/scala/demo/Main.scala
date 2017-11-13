@@ -24,9 +24,9 @@ object Main {
     val client =
       new IPPClient("http", "192.168.179.149", WELL_KNOWN_PORT, "print", Some(""))(actorSystem, mat)
 
-    val x        = ByteString(Files.readAllBytes(Paths.get("examples/pdf-sample.pdf")))
-    val printJob = client.printJob(x)
-    val y = Await.result(printJob, 10.seconds)
+    //val x        = ByteString(Files.readAllBytes(Paths.get("examples/pdf-sample.pdf")))
+    //val printJob = client.printJob(x)
+    //val y = Await.result(printJob, 10.seconds)
 
     //val x = client.poll(96)
 
@@ -34,16 +34,15 @@ object Main {
 
     //println(y)
 
-     /* val jobs = for (i <- 1 to 2) yield {
+    val jobs = for (i <- 1 to 2) yield {
       if (i % 10 == 0)
         Thread.sleep(200)
       client.printerAttributes()
     }
 
     Await.ready(Future.sequence(jobs), 10.minutes)
-    */
 
-    //val checkJob = client.getJobAttributes(71)
+    //val checkJob = client.getJobAttributes(96)
     //Await.result(checkJob, 10.seconds)
 
     Http().shutdownAllConnectionPools()

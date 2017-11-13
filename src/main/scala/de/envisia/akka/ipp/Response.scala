@@ -4,15 +4,16 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
 import akka.util.ByteString
-import de.envisia.akka.ipp.Response.{IppResponse, JobData}
+import de.envisia.akka.ipp.Response._
 import de.envisia.akka.ipp.attributes.Attributes._
 import de.envisia.akka.ipp.util.IppHelper
 
+import scala.reflect.runtime.universe._
 import scala.annotation.tailrec
 
 class Response(bs: ByteString) {
 
-  def getResponse(o: OperationType): IppResponse = {
+  def getResponse[A <: IppResponse](o: OperationType): A = {
     val bb      = bs.asByteBuffer
     val version = Array(bb.get, bb.get)(0)
     println(s"Version: $version")
@@ -61,9 +62,16 @@ class Response(bs: ByteString) {
 
     val attrs = parseAttributes(0x01.toByte, Map.empty) //TODO group byte? groupbyte not yet used
 
-    val jobData = o.operationId match {
+    val result = o.operationId match {
+      case x if x == OPERATION_IDS("Get-Printer-Attributes") =>
+        GetPrinterAttributesResponse(o.operationId, version, statusCode, requestId, attrs).asInstanceOf[A]
       case x if x == OPERATION_IDS("Print-Job") =>
-        Some(
+        PrintJobResponse(
+          o.operationId,
+          version,
+          statusCode,
+          requestId,
+          attrs,
           JobData(
             attrs("job-id").head.toInt,
             attrs("job-state").head.toInt,
@@ -71,9 +79,14 @@ class Response(bs: ByteString) {
             attrs("job-state-reasons"),
             attrs("number-of-intervening-jobs").head.toInt
           )
-        )
+        ).asInstanceOf[A]
       case x if x == OPERATION_IDS("Get-Job-Attributes") =>
-        Some(
+        GetJobAttributesResponse(
+          o.operationId,
+          version,
+          statusCode,
+          requestId,
+          attrs,
           JobData(
             attrs("job-id").head.toInt,
             attrs("job-state").head.toInt,
@@ -81,14 +94,12 @@ class Response(bs: ByteString) {
             attrs("job-state-reasons"),
             attrs("number-of-intervening-jobs").head.toInt
           )
-        )
-      case _ => None
+        ).asInstanceOf[A]
     }
-
-    val result = IppResponse(o.operationId, version, statusCode, requestId, attrs, jobData)
 
     println(result)
     println(attrs.size)
+
     result
   }
 
@@ -96,16 +107,35 @@ class Response(bs: ByteString) {
 
 object Response {
 
-  final case class IppResponse(
+  trait IppResponse
+
+  case class GetPrinterAttributesResponse(
+      oid: Byte,
+      version: Short,
+      statusCode: Short,
+      requestId: Int,
+      attributes: Map[String, List[String]]
+  ) extends IppResponse
+
+  case class GetJobAttributesResponse(
       oid: Byte,
       version: Short,
       statusCode: Short,
       requestId: Int,
       attributes: Map[String, List[String]],
-      jobData: Option[JobData]
-  )
+      jobData: JobData
+  ) extends IppResponse
 
-  final case class JobData(
+  case class PrintJobResponse(
+      oid: Byte,
+      version: Short,
+      statusCode: Short,
+      requestId: Int,
+      attributes: Map[String, List[String]],
+      jobData: JobData
+  ) extends IppResponse
+
+  case class JobData(
       jobID: Int,
       jobState: Int,
       jobURI: String,
