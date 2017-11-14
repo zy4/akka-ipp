@@ -3,11 +3,11 @@ package de.envisia.akka.ipp.services
 import java.util.concurrent.atomic.AtomicInteger
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
+import akka.http.scaladsl.{Http, HttpExt}
 import akka.http.scaladsl.model.MediaType.NotCompressible
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.{IOResult, Materializer}
+import akka.stream.{IOResult, KillSwitches, Materializer}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import de.envisia.akka.ipp.Response.{
@@ -26,11 +26,14 @@ class IPPClient(
     host: String,
     port: Int,
     queue: String = "print",
-    username: Option[String]
+    username: Option[String],
+    http: HttpExt
 )(
-    implicit actorSystem: ActorSystem,
-    mat: Materializer
+    implicit mat: Materializer,
+    val ec: ExecutionContext
 ) extends HttpRequestService {
+
+  private val killSwitch = KillSwitches.shared("printer")
 
   private val atomicInt = new AtomicInteger(0)
 
@@ -38,8 +41,6 @@ class IPPClient(
     atomicInt.updateAndGet(
       x => if (x + 1 == Int.MaxValue) 1 else x + 1
     )
-
-  override implicit val ec: ExecutionContext = actorSystem.dispatcher
 
   private val ippContentType = ContentType(MediaType.customBinary("application", "ipp", NotCompressible))
 
@@ -61,8 +62,8 @@ class IPPClient(
   def getJobAttributes[T <: IppResponse](jobId: Int): Future[GetJobAttributesResponse] =
     dispatch[GetJobAttributesResponse](GetJobAttributes(jobId))
 
-  def poll(jobId: Int, client: IPPClient): Future[Response.JobData] =
-    new PollingService(jobId, client).poll()
+  def poll(jobId: Int): Future[Response.JobData] =
+    new PollingService(this, killSwitch).poll(jobId)
 
   final protected[services] def dispatch[A <: IppResponse](ev: OperationType)(implicit tag: TypeTag[A]): Future[A] = {
 
@@ -107,6 +108,9 @@ class IPPClient(
 
   }
 
-  override def execute(request: HttpRequest): Future[HttpResponse] = Http().singleRequest(request)
+  override def execute(request: HttpRequest): Future[HttpResponse] = http.singleRequest(request)
+
+  def shutdown(): Future[Unit] =
+    Future.successful(killSwitch.shutdown())
 
 }

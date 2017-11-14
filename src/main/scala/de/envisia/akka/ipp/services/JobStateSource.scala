@@ -9,10 +9,9 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 
-class JobStateSource(jobId: Int, client: IPPClient)(implicit actorSystem: ActorSystem)
+class JobStateSource(jobId: Int, client: IPPClient)(implicit ec: ExecutionContext)
     extends GraphStage[SourceShape[JobData]] {
 
-  implicit val ec: ExecutionContext             = actorSystem.dispatcher
   private val out: Outlet[JobData]              = Outlet("JobStatusSource.out")
   override lazy val shape: SourceShape[JobData] = SourceShape.of(out)
 
@@ -25,7 +24,9 @@ class JobStateSource(jobId: Int, client: IPPClient)(implicit actorSystem: ActorS
           push(out, value.jobData)
           completeStage()
         } else {
+          //value.jobData.jobStateReasons
           println("Waiting")
+          println(value.jobData.jobStateReasons)
           scheduleOnce(None, 500.milliseconds)
         }
       case Failure(t) =>

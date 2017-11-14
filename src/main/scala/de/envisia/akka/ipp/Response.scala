@@ -97,7 +97,7 @@ class Response(bs: ByteString) {
         )
     }
 
-    //println(result)
+    println(result)
     //println(attrs.size)
 
     typeOf[A] match {

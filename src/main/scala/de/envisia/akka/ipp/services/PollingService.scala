@@ -1,17 +1,17 @@
 package de.envisia.akka.ipp.services
 
-import akka.actor.ActorSystem
-import akka.stream.scaladsl.{Sink, Source}
-import akka.stream.Materializer
+import akka.stream.scaladsl.{Keep, Sink, Source}
+import akka.stream.{Materializer, SharedKillSwitch}
 import de.envisia.akka.ipp.Response.JobData
-import scala.concurrent.Future
 
-class PollingService(jobId: Int, client: IPPClient)(
-    implicit actorSystem: ActorSystem,
-    mat: Materializer
+import scala.concurrent.{ExecutionContext, Future}
+
+class PollingService(client: IPPClient, killSwitch: SharedKillSwitch)(
+    implicit mat: Materializer,
+    val ec: ExecutionContext
 ) {
 
-  def poll(): Future[JobData] =
-    Source.fromGraph(new JobStateSource(jobId, client)).runWith(Sink.head)
+  def poll(jobId: Int): Future[JobData] =
+    Source.fromGraph(new JobStateSource(jobId, client)).viaMat(killSwitch.flow)(Keep.left).runWith(Sink.head)
 
 }
