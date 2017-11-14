@@ -95,6 +95,9 @@ class Response(bs: ByteString) {
             attrs("number-of-intervening-jobs").head.toInt
           )
         )
+      case x if x == OPERATION_IDS("Cancel-Job") =>
+        println("Cancel-Job")
+        CancelJobResponse(o.operationId, version, statusCode, requestId, attrs)
     }
 
     println(result)
@@ -104,6 +107,7 @@ class Response(bs: ByteString) {
       case t if t =:= typeOf[GetPrinterAttributesResponse] => result.asInstanceOf[A]
       case t if t =:= typeOf[GetJobAttributesResponse]     => result.asInstanceOf[A]
       case t if t =:= typeOf[PrintJobResponse]             => result.asInstanceOf[A]
+      case t if t =:= typeOf[CancelJobResponse]            => result.asInstanceOf[A]
       case _                                               => throw new IllegalStateException("wrong response type found")
     }
 
@@ -114,6 +118,14 @@ class Response(bs: ByteString) {
 object Response {
 
   trait IppResponse
+
+  case class CancelJobResponse(
+      oid: Byte,
+      version: Short,
+      statusCode: Short,
+      requestId: Int,
+      attributes: Map[String, List[String]]
+  ) extends IppResponse
 
   case class GetPrinterAttributesResponse(
       oid: Byte,

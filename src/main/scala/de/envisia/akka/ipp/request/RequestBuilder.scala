@@ -24,6 +24,11 @@ class RequestBuilder[T <: RequestBuilder.Request](
       attributes + ("attributes-natural-language" -> (ATTRIBUTE_TAGS("attributes-natural-language"), lang))
     )
 
+  def setJobUri(jobUri: String): RequestBuilder[T with JobUri] =
+    new RequestBuilder(
+      attributes + ("job-uri" -> (ATTRIBUTE_TAGS("job-uri"), jobUri))
+    )
+
   def setUser(user: String): RequestBuilder[T with User] =
     new RequestBuilder(attributes + ("requesting-user-name" -> (ATTRIBUTE_TAGS("requesting-user-name"), user)))
 
@@ -76,9 +81,11 @@ object RequestBuilder {
     sealed trait JobAttribute       extends Request
     sealed trait OperationAttribute extends Request
     sealed trait JobId              extends Request
+    sealed trait JobUri             extends Request
 
     //type MinimalRequest = EmptyRequest
     type GetPrinterAttributes = EmptyRequest with Charset with Language with PrinterUri
+    type CancelJob            = EmptyRequest with Charset with Language with PrinterUri with User
     type PrintJob             = EmptyRequest with Charset with Language with PrinterUri with User with JobName with Format
     type ValidateJob          = EmptyRequest with Charset with Language with PrinterUri with User with JobName with Format
     type GetJobAttributes     = EmptyRequest with Charset with Language with PrinterUri with User with JobId

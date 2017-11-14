@@ -22,7 +22,8 @@ object Attributes {
     "Validate-Job"           -> 0x04.toByte,
     "Get-Job-Attributes"     -> 0x09.toByte,
     "Create-Job"             -> 0x05.toByte,
-    "Send-Document"          -> 0x06.toByte
+    "Send-Document"          -> 0x06.toByte,
+    "Cancel-Job"             -> 0x08.toByte
   )
 
   final val ATTRIBUTE_TAGS: Map[String, Byte] = Map(
@@ -32,7 +33,8 @@ object Attributes {
     "requesting-user-name"        -> 0x42.toByte,
     "job-name"                    -> 0x42.toByte,
     "document-format"             -> 0x49.toByte,
-    "job-id"                      -> 0x21.toByte
+    "job-id"                      -> 0x21.toByte,
+    "job-uri"                     -> 0x45.toByte
   )
 
   //attr tags Integer (0x21) && Enum (0x23)

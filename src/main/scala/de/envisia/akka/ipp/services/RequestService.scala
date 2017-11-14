@@ -16,6 +16,16 @@ class RequestService(
     requestId: Int = 1
 ) {
 
+  def cancelJob(operationId: Byte, jobId: Int): ByteString =
+    new RequestBuilder[CancelJob]()
+      .setCharset(charset)
+      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
+      .setLanguage(lang)
+      .setUser(user)
+      .setJobUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue + "/job-" + jobId)
+      .build[CancelJob](operationId, requestId)
+      .request
+
   def getPrinterAttributes(operationId: Byte): ByteString =
     new RequestBuilder[GetPrinterAttributes]()
       .setCharset(charset)

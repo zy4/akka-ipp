@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets
 
 import akka.util.ByteString
 import de.envisia.akka.ipp.attributes.Attributes.{ATTRIBUTE_GROUPS, IPP_VERSION, RESERVED}
-import de.envisia.akka.ipp.request.RequestBuilder.Request.{CreateJob, GetPrinterAttributes, ValidateJob}
+import de.envisia.akka.ipp.request.RequestBuilder.Request.{CancelJob, CreateJob, GetPrinterAttributes, ValidateJob}
 import de.envisia.akka.ipp.status.IppExceptions.WrongRequestType
 
 class RequestSerializer(attributes: Map[String, (Byte, String)] = Map.empty[String, (Byte, String)]) {
@@ -60,6 +60,8 @@ class RequestSerializer(attributes: Map[String, (Byte, String)] = Map.empty[Stri
 
     tag match {
 
+      case t if t == typeTag[CancelJob] =>
+        base ++ putAttribute("job-uri") ++ putAttribute("requesting-user-name") ++ putEnd
       case t if t == typeTag[GetPrinterAttributes] => base ++ putEnd
       case t if t == typeTag[RequestBuilder.Request.PrintJob] | t == typeTag[ValidateJob] =>
         base ++
