@@ -28,19 +28,19 @@ object Main {
     //val printJob = client.printJob(x)
     //val y = Await.result(printJob, 10.seconds)
 
-    //val x = client.poll(102)
+    val x = client.poll(102, client)
 
     //val y = Await.result(x, 10.seconds)
 
     //println(y)
 
-    val jobs = for (i <- 1 to 2) yield {
+    /*val jobs = for (i <- 1 to 2) yield {
       if (i % 10 == 0)
         Thread.sleep(200)
       client.printerAttributes()
     }
 
-    Await.ready(Future.sequence(jobs), 10.minutes)
+    Await.ready(Future.sequence(jobs), 10.minutes) */
 
     //val checkJob = client.getJobAttributes(102)
     //Await.result(checkJob, 10.seconds)

@@ -61,9 +61,10 @@ class IPPClient(
   def getJobAttributes[T <: IppResponse](jobId: Int): Future[GetJobAttributesResponse] =
     dispatch[GetJobAttributesResponse](GetJobAttributes(jobId))
 
-  def poll(jobId: Int): Future[String] = new PollingService(jobId, this).poll().asInstanceOf[Future[String]]
+  def poll(jobId: Int, client: IPPClient): Future[Response.JobData] =
+    new PollingService(jobId, client).poll()
 
-  final protected def dispatch[A <: IppResponse](ev: OperationType)(implicit tag: TypeTag[A]): Future[A] = {
+  final protected[services] def dispatch[A <: IppResponse](ev: OperationType)(implicit tag: TypeTag[A]): Future[A] = {
 
     val service = new RequestService("ipp://" + host, queue = queue, requestId = getRequestId)
 

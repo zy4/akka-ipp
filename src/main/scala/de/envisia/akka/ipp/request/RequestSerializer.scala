@@ -17,7 +17,7 @@ class RequestSerializer(attributes: Map[String, (Byte, String)] = Map.empty[Stri
     ByteString.newBuilder
       .putBytes(Array(IPP_VERSION, RESERVED))
       .putBytes(Array(RESERVED, operationId))
-      .putInt(requestId) // TODO does not increment
+      .putInt(requestId)
       .putByte(ATTRIBUTE_GROUPS("operation-attributes-tag"))
       .result()
   @inline protected[request] final def putAttribute(name: String): ByteString =

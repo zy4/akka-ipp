@@ -97,8 +97,8 @@ class Response(bs: ByteString) {
         )
     }
 
-    println(result)
-    println(attrs.size)
+    //println(result)
+    //println(attrs.size)
 
     typeOf[A] match {
       case t if t =:= typeOf[GetPrinterAttributesResponse] => result.asInstanceOf[A]
