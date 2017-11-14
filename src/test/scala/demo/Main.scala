@@ -28,7 +28,7 @@ object Main {
     //val printJob = client.printJob(x)
     //val y = Await.result(printJob, 10.seconds)
 
-    //val x = client.poll(96)
+    //val x = client.poll(102)
 
     //val y = Await.result(x, 10.seconds)
 
@@ -42,7 +42,7 @@ object Main {
 
     Await.ready(Future.sequence(jobs), 10.minutes)
 
-    //val checkJob = client.getJobAttributes(96)
+    //val checkJob = client.getJobAttributes(102)
     //Await.result(checkJob, 10.seconds)
 
     Http().shutdownAllConnectionPools()

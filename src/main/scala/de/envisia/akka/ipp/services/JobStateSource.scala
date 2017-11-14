@@ -1,18 +1,21 @@
 package de.envisia.akka.ipp.services
 
 import akka.actor.ActorSystem
-import akka.stream.{ Attributes, Outlet, SourceShape }
+import akka.stream.{Attributes, Outlet, SourceShape}
 import akka.stream.stage._
 import de.envisia.akka.ipp.Response.GetJobAttributesResponse
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
-class JobStateSource(jobId: Int, client: IPPClient)(implicit actorSystem: ActorSystem) extends GraphStage[SourceShape[java.io.Serializable]] {
-  implicit val ec: ExecutionContext = actorSystem.dispatcher
-  private val out: Outlet[java.io.Serializable] = Outlet("JobStatusSource.out")
+class JobStateSource(jobId: Int, client: IPPClient)(implicit actorSystem: ActorSystem)
+    extends GraphStage[SourceShape[java.io.Serializable]] {
+
+  implicit val ec: ExecutionContext                          = actorSystem.dispatcher
+  private val out: Outlet[java.io.Serializable]              = Outlet("JobStatusSource.out")
   override lazy val shape: SourceShape[java.io.Serializable] = SourceShape.of(out)
+
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic = new TimerGraphStageLogic(shape) {
 
     val callback: AsyncCallback[Try[GetJobAttributesResponse]] = getAsyncCallback[Try[GetJobAttributesResponse]] {
@@ -31,14 +34,12 @@ class JobStateSource(jobId: Int, client: IPPClient)(implicit actorSystem: ActorS
     }
 
     setHandler(out, new OutHandler {
-      override def onPull(): Unit = {
+      override def onPull(): Unit =
         client.getJobAttributes(jobId).onComplete(callback.invoke)
-      }
     })
 
-    override protected def onTimer(timerKey: Any): Unit = {
+    override protected def onTimer(timerKey: Any): Unit =
       client.getJobAttributes(jobId).onComplete(callback.invoke)
-    }
 
   }
 }

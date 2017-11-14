@@ -7,14 +7,19 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.MediaType.NotCompressible
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.{ IOResult, Materializer }
+import akka.stream.{IOResult, Materializer}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import de.envisia.akka.ipp.Response.{ GetJobAttributesResponse, GetPrinterAttributesResponse, IppResponse, PrintJobResponse }
+import de.envisia.akka.ipp.Response.{
+  GetJobAttributesResponse,
+  GetPrinterAttributesResponse,
+  IppResponse,
+  PrintJobResponse
+}
 import de.envisia.akka.ipp._
 
 import scala.reflect.runtime.universe._
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 class IPPClient(
     prefix: String,
@@ -39,16 +44,10 @@ class IPPClient(
   private val ippContentType = ContentType(MediaType.customBinary("application", "ipp", NotCompressible))
 
   def printJob(data: ByteString): Future[PrintJobResponse] =
-    dispatch(PrintJob(data)) match {
-      case x: Future[PrintJobResponse] => x // TODO eliminated by erasure
-      case _ => throw new IllegalStateException("expected PrintJobResponse")
-    }
+    dispatch[Response.PrintJobResponse](PrintJob(data))
 
   def printerAttributes(): Future[GetPrinterAttributesResponse] =
-    dispatch(GetPrinterAttributes) match {
-      case x: Future[PrintJobResponse] => x // TODO eliminated by erasure
-      case _ => throw new IllegalStateException("expected GetPrinterAttributesResponse")
-    }
+    dispatch[GetPrinterAttributesResponse](GetPrinterAttributes)
 
   def validateJob(): Future[_] =
     dispatch(ValidateJob)
@@ -64,7 +63,7 @@ class IPPClient(
 
   def poll(jobId: Int): Future[String] = new PollingService(jobId, this).poll().asInstanceOf[Future[String]]
 
-  final protected def dispatch[A <: IppResponse](ev: OperationType): Future[A] = {
+  final protected def dispatch[A <: IppResponse](ev: OperationType)(implicit tag: TypeTag[A]): Future[A] = {
 
     val service = new RequestService("ipp://" + host, queue = queue, requestId = getRequestId)
 

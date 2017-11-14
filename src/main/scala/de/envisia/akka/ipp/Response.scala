@@ -13,7 +13,7 @@ import scala.annotation.tailrec
 
 class Response(bs: ByteString) {
 
-  def getResponse[A <: IppResponse](o: OperationType): A = {
+  def getResponse[A <: IppResponse](o: OperationType)(implicit tTag: TypeTag[A]): A = {
     val bb      = bs.asByteBuffer
     val version = Array(bb.get, bb.get)(0)
     println(s"Version: $version")
@@ -64,7 +64,7 @@ class Response(bs: ByteString) {
 
     val result = o.operationId match {
       case x if x == OPERATION_IDS("Get-Printer-Attributes") =>
-        GetPrinterAttributesResponse(o.operationId, version, statusCode, requestId, attrs).asInstanceOf[A]
+        GetPrinterAttributesResponse(o.operationId, version, statusCode, requestId, attrs)
       case x if x == OPERATION_IDS("Print-Job") =>
         PrintJobResponse(
           o.operationId,
@@ -79,7 +79,7 @@ class Response(bs: ByteString) {
             attrs("job-state-reasons"),
             attrs("number-of-intervening-jobs").head.toInt
           )
-        ).asInstanceOf[A]
+        )
       case x if x == OPERATION_IDS("Get-Job-Attributes") =>
         GetJobAttributesResponse(
           o.operationId,
@@ -94,13 +94,19 @@ class Response(bs: ByteString) {
             attrs("job-state-reasons"),
             attrs("number-of-intervening-jobs").head.toInt
           )
-        ).asInstanceOf[A]
+        )
     }
 
     println(result)
     println(attrs.size)
 
-    result
+    typeOf[A] match {
+      case t if t =:= typeOf[GetPrinterAttributesResponse] => result.asInstanceOf[A]
+      case t if t =:= typeOf[GetJobAttributesResponse]     => result.asInstanceOf[A]
+      case t if t =:= typeOf[PrintJobResponse]             => result.asInstanceOf[A]
+      case _                                               => throw new IllegalStateException("wrong response type found")
+    }
+
   }
 
 }
