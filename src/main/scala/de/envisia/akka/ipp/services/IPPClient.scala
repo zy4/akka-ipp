@@ -14,7 +14,7 @@ import akka.util.ByteString
 import de.envisia.akka.ipp.Response._
 import de.envisia.akka.ipp._
 import de.envisia.akka.ipp.model.IppConfig
-
+import org.slf4j.LoggerFactory
 import scala.reflect.runtime.universe._
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -31,6 +31,9 @@ class IPPClient(http: HttpExt)(
     implicit mat: Materializer,
     val ec: ExecutionContext
 ) extends HttpRequestService {
+
+  private val logger = LoggerFactory.getLogger(getClass)
+  logger.debug("IPPClient initialized")
 
   private val killSwitch = KillSwitches.shared("printer")
 

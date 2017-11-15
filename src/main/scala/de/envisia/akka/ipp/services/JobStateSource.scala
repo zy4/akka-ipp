@@ -1,5 +1,6 @@
 package de.envisia.akka.ipp.services
 
+import akka.event.slf4j.Logger
 import akka.stream.{ Attributes, Outlet, SourceShape }
 import akka.stream.stage._
 import de.envisia.akka.ipp.Response.{ GetJobAttributesResponse, JobData }
@@ -14,22 +15,26 @@ class JobStateSource(jobId: Int, client: IPPClient, config: IppConfig)(implicit 
   private val out: Outlet[JobData]              = Outlet("JobStatusSource.out")
   override lazy val shape: SourceShape[JobData] = SourceShape.of(out)
 
+  private val logger = Logger("PollingLogger")
+
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic = new TimerGraphStageLogic(shape) {
 
     val callback: AsyncCallback[Try[GetJobAttributesResponse]] = getAsyncCallback[Try[GetJobAttributesResponse]] {
       case Success(value) =>
-        println("Success")
-        if (value.jobData.jobState == 9 || value.jobData.jobState == 8 || value.jobData.jobState == 7) {
+        logger.info("Success")
+        if (value.jobData.jobState == 9 ||
+            value.jobData.jobState == 8 ||
+            value.jobData.jobState == 7 ||
+            value.jobData.jobState == 6) {
           push(out, value.jobData)
           completeStage()
         } else {
-          //value.jobData.jobStateReasons
-          println("Waiting")
+          logger.info("Waiting")
           println(value.jobData.jobStateReasons)
           scheduleOnce(None, config.pollingInterval)
         }
       case Failure(t) =>
-        println("Failure")
+        logger.info("Failed")
         fail(out, t)
     }
 

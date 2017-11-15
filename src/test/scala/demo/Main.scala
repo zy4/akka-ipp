@@ -3,6 +3,7 @@ package demo
 import java.nio.file.{ Files, Paths }
 
 import akka.actor.ActorSystem
+
 import akka.http.scaladsl.Http
 import akka.stream.scaladsl.FileIO
 import akka.stream.{ ActorMaterializer, Materializer }
@@ -10,7 +11,6 @@ import akka.util.ByteString
 import de.envisia.akka.ipp.attributes.Attributes._
 import de.envisia.akka.ipp.model.IppConfig
 import de.envisia.akka.ipp.services.IPPClient
-
 import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.concurrent.duration._
 
@@ -28,7 +28,7 @@ object Main {
       new IPPClient(http)(mat, executionContext)
 
 
-    val config = IppConfig("192.168.179.149", WELL_KNOWN_PORT, "print", Some(""))
+    val config = IppConfig("192.168.179.149", WELL_KNOWN_PORT, "print", Some(""), 2.seconds)
 
     //val x        = ByteString(Files.readAllBytes(Paths.get("examples/pdf-sample.pdf")))
     //val printJob = client.printJob(x, config)
@@ -54,6 +54,8 @@ object Main {
 
     //val checkJob = client.getJobAttributes(102)
     //Await.result(checkJob, 10.seconds)
+
+
 
     http.shutdownAllConnectionPools()
     actorSystem.terminate()
