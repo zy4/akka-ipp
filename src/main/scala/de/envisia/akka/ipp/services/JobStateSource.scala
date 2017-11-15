@@ -1,13 +1,11 @@
 package de.envisia.akka.ipp.services
 
-import akka.actor.ActorSystem
 import akka.stream.{ Attributes, Outlet, SourceShape }
 import akka.stream.stage._
 import de.envisia.akka.ipp.Response.{ GetJobAttributesResponse, JobData }
 import de.envisia.akka.ipp.model.IppConfig
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
 import scala.util.{ Failure, Success, Try }
 
 class JobStateSource(jobId: Int, client: IPPClient, config: IppConfig)(implicit ec: ExecutionContext)
@@ -28,7 +26,7 @@ class JobStateSource(jobId: Int, client: IPPClient, config: IppConfig)(implicit 
           //value.jobData.jobStateReasons
           println("Waiting")
           println(value.jobData.jobStateReasons)
-          scheduleOnce(None, 500.milliseconds)
+          scheduleOnce(None, config.pollingInterval)
         }
       case Failure(t) =>
         println("Failure")

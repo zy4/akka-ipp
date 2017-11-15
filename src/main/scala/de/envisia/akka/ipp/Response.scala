@@ -76,7 +76,7 @@ class Response(bs: ByteString) {
             attrs("job-id").head.toInt,
             attrs("job-state").head.toInt,
             attrs("job-uri").head,
-            attrs("job-state-reasons"),
+            attrs("job-state-reasons").head,
             attrs("number-of-intervening-jobs").head.toInt
           )
         )
@@ -91,7 +91,7 @@ class Response(bs: ByteString) {
             attrs("job-id").head.toInt,
             attrs("job-state").head.toInt,
             attrs("job-uri").head,
-            attrs("job-state-reasons"),
+            attrs("job-state-reasons").head,
             attrs("number-of-intervening-jobs").head.toInt
           )
         )
@@ -157,7 +157,7 @@ object Response {
       jobID: Int,
       jobState: Int,
       jobURI: String,
-      jobStateReasons: List[String],
+      jobStateReasons: String,
       numberOfInterveningJobs: Int
   )
 
