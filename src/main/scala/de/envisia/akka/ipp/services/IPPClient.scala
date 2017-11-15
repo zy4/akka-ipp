@@ -6,23 +6,24 @@ import akka.http.scaladsl.HttpExt
 import akka.http.scaladsl.model.MediaType.NotCompressible
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.{ IOResult, KillSwitches, Materializer }
+import akka.stream.{IOResult, KillSwitches, Materializer}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import de.envisia.akka.ipp.Response._
 import de.envisia.akka.ipp._
+import de.envisia.akka.ipp.model.IppConfig
 
 import scala.reflect.runtime.universe._
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
-class IPPClient(
-    prefix: String,
-    host: String,
-    port: Int,
-    queue: String = "print",
-    username: Option[String],
-    http: HttpExt
-)(
+/*
+@Singleton
+class IPPClientProvider @Inject()(implicit: ...) extends Provider[IPPClient] {
+  override lazy val get: IPPClient = new IPPClient(Http())
+}
+ */
+
+class IPPClient(http: HttpExt)(
     implicit mat: Materializer,
     val ec: ExecutionContext
 ) extends HttpRequestService {
@@ -38,33 +39,33 @@ class IPPClient(
 
   private val ippContentType = ContentType(MediaType.customBinary("application", "ipp", NotCompressible))
 
-  def cancelJob(jobId: Int): Future[CancelJobResponse] =
-    dispatch[CancelJobResponse](CancelJob(jobId))
+  def cancelJob(jobId: Int, config: IppConfig): Future[CancelJobResponse] =
+    dispatch[CancelJobResponse](CancelJob(jobId), config)
 
-  def printJob(data: ByteString): Future[PrintJobResponse] =
-    dispatch[Response.PrintJobResponse](PrintJob(data))
+  def printJob(data: ByteString, config: IppConfig): Future[PrintJobResponse] =
+    dispatch[Response.PrintJobResponse](PrintJob(data), config)
 
-  def printerAttributes(): Future[GetPrinterAttributesResponse] =
-    dispatch[GetPrinterAttributesResponse](GetPrinterAttributes)
+  def printerAttributes(config: IppConfig): Future[GetPrinterAttributesResponse] =
+    dispatch[GetPrinterAttributesResponse](GetPrinterAttributes, config)
 
-  def validateJob(): Future[_] =
-    dispatch(ValidateJob)
+  def validateJob(config: IppConfig): Future[_] =
+    dispatch(ValidateJob, config)
 
-  def createJob(): Future[_] =
-    dispatch(CreateJob)
+  def createJob(config: IppConfig): Future[_] =
+    dispatch(CreateJob, config)
 
-  def sendDocument(file: Source[ByteString, Future[IOResult]]): Future[_] =
-    dispatch(SendDocument(file))
+  def sendDocument(file: Source[ByteString, Future[IOResult]], config: IppConfig): Future[_] =
+    dispatch(SendDocument(file), config)
 
-  def getJobAttributes[T <: IppResponse](jobId: Int): Future[GetJobAttributesResponse] =
-    dispatch[GetJobAttributesResponse](GetJobAttributes(jobId))
+  def getJobAttributes[T <: IppResponse](jobId: Int, config: IppConfig): Future[GetJobAttributesResponse] =
+    dispatch[GetJobAttributesResponse](GetJobAttributes(jobId), config)
 
-  def poll(jobId: Int): Future[Response.JobData] =
-    new PollingService(this, killSwitch).poll(jobId)
+  def poll(jobId: Int, config: IppConfig): Future[Response.JobData] =
+    new PollingService(this, killSwitch).poll(jobId, config)
 
-  final protected[services] def dispatch[A <: IppResponse](ev: OperationType)(implicit tag: TypeTag[A]): Future[A] = {
+  final protected[services] def dispatch[A <: IppResponse](ev: OperationType, config: IppConfig)(implicit tag: TypeTag[A]): Future[A] = {
 
-    val service = new RequestService("ipp://" + host, queue = queue, requestId = getRequestId)
+    val service = new RequestService("ipp://" + config.host, queue = config.queue, requestId = getRequestId)
 
     val body = ev match {
 
@@ -94,7 +95,7 @@ class IPPClient(
 
     val ntt = HttpEntity(ippContentType, body)
 
-    val request = HttpRequest(HttpMethods.POST, uri = s"$prefix://$host:$port", entity = ntt)
+    val request = HttpRequest(HttpMethods.POST, uri = s"http://${config.host}:${config.port}", entity = ntt)
 
     val response = this.execute(request)
     val result = response.flatMap {

@@ -85,7 +85,7 @@ object RequestBuilder {
 
     //type MinimalRequest = EmptyRequest
     type GetPrinterAttributes = EmptyRequest with Charset with Language with PrinterUri
-    type CancelJob            = EmptyRequest with Charset with Language with PrinterUri with User
+    type CancelJob            = EmptyRequest with Charset with Language with PrinterUri with User with JobUri
     type PrintJob             = EmptyRequest with Charset with Language with PrinterUri with User with JobName with Format
     type ValidateJob          = EmptyRequest with Charset with Language with PrinterUri with User with JobName with Format
     type GetJobAttributes     = EmptyRequest with Charset with Language with PrinterUri with User with JobId
