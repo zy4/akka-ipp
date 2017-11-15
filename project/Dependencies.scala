@@ -8,13 +8,14 @@ object Dependencies {
 
   lazy val commonDeps =
     Seq(
-      "org.scalatest"     %% "scalatest"            % scalaTestV % Test,
-      "com.typesafe.akka" %% "akka-actor"           % akkaV,
-      "com.typesafe.akka" %% "akka-slf4j"           % akkaV,
-      "com.typesafe.akka" %% "akka-stream"          % akkaV,
-      "com.typesafe.akka" %% "akka-http"            % akkaHttpV,
-      "com.typesafe.akka" %% "akka-http-testkit"    % akkaHttpV % Test,
-      "com.typesafe.akka" %% "akka-stream-testkit"  % akkaV % Test
+      "org.scalatest"     %% "scalatest"           % scalaTestV % Test,
+      "com.typesafe.akka" %% "akka-actor"          % akkaV,
+      "com.typesafe.akka" %% "akka-slf4j"          % akkaV,
+      "com.typesafe.akka" %% "akka-stream"         % akkaV,
+      "com.typesafe.akka" %% "akka-http"           % akkaHttpV,
+      "com.typesafe.akka" %% "akka-http-testkit"   % akkaHttpV % Test,
+      "com.typesafe.akka" %% "akka-stream-testkit" % akkaV % Test,
+      "javax.inject"      % "javax.inject"         % "1"
     )
 
 }

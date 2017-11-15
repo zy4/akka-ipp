@@ -1,8 +1,10 @@
 package de.envisia.akka.ipp.services
 
 import java.util.concurrent.atomic.AtomicInteger
+import javax.inject.{Inject, Provider, Singleton}
 
-import akka.http.scaladsl.HttpExt
+import akka.actor.ActorSystem
+import akka.http.scaladsl.{Http, HttpExt}
 import akka.http.scaladsl.model.MediaType.NotCompressible
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
@@ -16,12 +18,14 @@ import de.envisia.akka.ipp.model.IppConfig
 import scala.reflect.runtime.universe._
 import scala.concurrent.{ExecutionContext, Future}
 
-/*
 @Singleton
-class IPPClientProvider @Inject()(implicit: ...) extends Provider[IPPClient] {
+class IPPClientProvider @Inject()(
+    implicit mat: Materializer,
+    val actorSystem: ActorSystem,
+    val ec: ExecutionContext
+) extends Provider[IPPClient] {
   override lazy val get: IPPClient = new IPPClient(Http())
 }
- */
 
 class IPPClient(http: HttpExt)(
     implicit mat: Materializer,
@@ -63,7 +67,9 @@ class IPPClient(http: HttpExt)(
   def poll(jobId: Int, config: IppConfig): Future[Response.JobData] =
     new PollingService(this, killSwitch).poll(jobId, config)
 
-  final protected[services] def dispatch[A <: IppResponse](ev: OperationType, config: IppConfig)(implicit tag: TypeTag[A]): Future[A] = {
+  final protected[services] def dispatch[A <: IppResponse](ev: OperationType, config: IppConfig)(
+      implicit tag: TypeTag[A]
+  ): Future[A] = {
 
     val service = new RequestService("ipp://" + config.host, queue = config.queue, requestId = getRequestId)
 
