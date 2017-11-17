@@ -20,6 +20,8 @@ scalacOptions := Seq(
   "utf8"
 )
 
+publishMavenStyle in ThisBuild := true
+pomIncludeRepository in ThisBuild := { _ => false }
 publishTo := Some("envisia-nexus" at "https://nexus.envisia.de/repository/internal/")
 
 releasePublishArtifactsAction := PgpKeys.publishSigned.value
