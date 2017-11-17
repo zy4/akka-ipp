@@ -22,6 +22,7 @@ scalacOptions := Seq(
 
 publishMavenStyle in ThisBuild := true
 pomIncludeRepository in ThisBuild := { _ => false }
+updateOptions := updateOptions.value.withGigahorse(false)
 publishTo := Some("envisia-nexus" at "https://nexus.envisia.de/repository/internal/")
 
 releasePublishArtifactsAction := PgpKeys.publishSigned.value
