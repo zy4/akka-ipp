@@ -30,9 +30,9 @@ object Main {
 
     val config = IppConfig("192.168.179.149", WELL_KNOWN_PORT, "print", Some(""), 2.seconds)
 
-    //val x        = ByteString(Files.readAllBytes(Paths.get("examples/pdf-sample.pdf")))
-    //val printJob = client.printJob(x, config)
-    //val y = Await.result(printJob, 10.seconds)
+    val x        = ByteString(Files.readAllBytes(Paths.get("examples/pdf-sample.pdf")))
+    val printJob = client.printJob(x, config)
+    val y = Await.result(printJob, 10.seconds)
 
     //val x = client.poll(114, config)
 
@@ -44,13 +44,13 @@ object Main {
 
     //println(y)
 
-    val jobs = for (i <- 1 to 2) yield {
+    /*val jobs = for (i <- 1 to 2) yield {
       if (i % 10 == 0)
         Thread.sleep(200)
       client.printerAttributes(config)
     }
 
-    Await.ready(Future.sequence(jobs), 10.minutes)
+    Await.ready(Future.sequence(jobs), 10.minutes) */
 
     //val checkJob = client.getJobAttributes(102)
     //Await.result(checkJob, 10.seconds)
