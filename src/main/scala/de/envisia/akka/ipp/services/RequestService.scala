@@ -54,38 +54,4 @@ class RequestService(
       .setFormat(format)
       .build[RequestBuilder.Request.PrintJob](operationId, requestId)
       .request ++ data
-
-  def validateJob(operationId: Byte): ByteString =
-    new RequestBuilder[ValidateJob]()
-      .setCharset(charset)
-      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
-      .setLanguage(lang)
-      .setUser(user)
-      .setJobName(jobName)
-      .setFormat(format)
-      .build[ValidateJob](operationId, requestId)
-      .request
-
-  def createJob(operationId: Byte): ByteString =
-    new RequestBuilder[CreateJob]()
-      .setCharset(charset)
-      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
-      .setLanguage(lang)
-      .setUser(user)
-      .setJobName(jobName)
-      .setFormat(format)
-      .build[CreateJob](operationId, requestId)
-      .request
-
-  def sendDocument(operationId: Byte): ByteString =
-    new RequestBuilder[SendDocument]()
-      .setCharset(charset)
-      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
-      .setLanguage(lang)
-      .setUser(user)
-      .setJobName(jobName)
-      .setFormat(format)
-      .build[SendDocument](operationId, requestId)
-      .request
-
 }

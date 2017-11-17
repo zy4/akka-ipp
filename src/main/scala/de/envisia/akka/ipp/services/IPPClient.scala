@@ -1,36 +1,27 @@
 package de.envisia.akka.ipp.services
 
 import java.util.concurrent.atomic.AtomicInteger
-import javax.inject.{Inject, Provider, Singleton}
-
-import akka.actor.ActorSystem
-import akka.http.scaladsl.{Http, HttpExt}
+import akka.http.scaladsl.HttpExt
 import akka.http.scaladsl.model.MediaType.NotCompressible
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.{IOResult, KillSwitches, Materializer}
+import akka.stream.{ KillSwitches, Materializer }
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
+import de.envisia.akka.ipp.OperationType._
 import de.envisia.akka.ipp.Response._
 import de.envisia.akka.ipp._
 import de.envisia.akka.ipp.model.IppConfig
 import org.slf4j.LoggerFactory
-import scala.reflect.runtime.universe._
-import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton
-class IPPClientProvider @Inject()(
-    implicit mat: Materializer,
-    val actorSystem: ActorSystem,
-    val ec: ExecutionContext
-) extends Provider[IPPClient] {
-  override lazy val get: IPPClient = new IPPClient(Http())
-}
+import scala.reflect.runtime.universe._
+import scala.concurrent.{ ExecutionContext, Future }
+
 
 class IPPClient(http: HttpExt)(
     implicit mat: Materializer,
     val ec: ExecutionContext
-) extends HttpRequestService {
+) {
 
   private val logger = LoggerFactory.getLogger(getClass)
   logger.debug("IPPClient initialized")
@@ -55,15 +46,6 @@ class IPPClient(http: HttpExt)(
   def printerAttributes(config: IppConfig): Future[GetPrinterAttributesResponse] =
     dispatch[GetPrinterAttributesResponse](GetPrinterAttributes, config)
 
-  def validateJob(config: IppConfig): Future[_] =
-    dispatch(ValidateJob, config)
-
-  def createJob(config: IppConfig): Future[_] =
-    dispatch(CreateJob, config)
-
-  def sendDocument(file: Source[ByteString, Future[IOResult]], config: IppConfig): Future[_] =
-    dispatch(SendDocument(file), config)
-
   def getJobAttributes[T <: IppResponse](jobId: Int, config: IppConfig): Future[GetJobAttributesResponse] =
     dispatch[GetJobAttributesResponse](GetJobAttributes(jobId), config)
 
@@ -87,15 +69,6 @@ class IPPClient(http: HttpExt)(
       case GetPrinterAttributes =>
         Source.single(service.getPrinterAttributes(GetPrinterAttributes.operationId))
 
-      case ValidateJob =>
-        Source.single(service.validateJob(ValidateJob.operationId))
-
-      case CreateJob =>
-        Source.single(service.createJob(CreateJob.operationId))
-
-      case SendDocument(file) =>
-        Source.single(service.sendDocument(SendDocument(file).operationId)).concat(file)
-
       case GetJobAttributes(jobId) =>
         println("GetJobAttributes")
         Source.single(service.getJobAttributes(GetJobAttributes(jobId).operationId, jobId))
@@ -118,7 +91,7 @@ class IPPClient(http: HttpExt)(
 
   }
 
-  override def execute(request: HttpRequest): Future[HttpResponse] = http.singleRequest(request)
+  def execute(request: HttpRequest): Future[HttpResponse] = http.singleRequest(request)
 
   def shutdown(): Future[Unit] =
     Future.successful(killSwitch.shutdown())

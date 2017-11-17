@@ -2,7 +2,7 @@ package de.envisia.akka.ipp.util
 
 import java.nio.ByteBuffer
 
-object IppHelper {
+private[ipp] object IppHelper {
 
   def bytes2hex(bytes: Array[Byte], sep: Option[String] = None): String =
     sep match {

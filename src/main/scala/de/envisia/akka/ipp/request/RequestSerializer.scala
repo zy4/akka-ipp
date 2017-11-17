@@ -5,8 +5,7 @@ import java.nio.charset.StandardCharsets
 
 import akka.util.ByteString
 import de.envisia.akka.ipp.attributes.Attributes.{ATTRIBUTE_GROUPS, IPP_VERSION, RESERVED}
-import de.envisia.akka.ipp.request.RequestBuilder.Request.{CancelJob, CreateJob, GetPrinterAttributes, ValidateJob}
-import de.envisia.akka.ipp.status.IppExceptions.WrongRequestType
+import de.envisia.akka.ipp.request.RequestBuilder.Request.{CancelJob, GetPrinterAttributes}
 
 class RequestSerializer(attributes: Map[String, (Byte, String)] = Map.empty[String, (Byte, String)]) {
 
@@ -59,26 +58,12 @@ class RequestSerializer(attributes: Map[String, (Byte, String)] = Map.empty[Stri
       putAttribute("printer-uri")
 
     tag match {
-
       case t if t == typeTag[CancelJob] =>
         base ++ putAttribute("job-uri") ++ putAttribute("requesting-user-name") ++ putEnd
       case t if t == typeTag[GetPrinterAttributes] => base ++ putEnd
-      case t if t == typeTag[RequestBuilder.Request.PrintJob] | t == typeTag[ValidateJob] =>
-        base ++
-          putAttribute("requesting-user-name") ++
-          putAttribute("job-name") ++
-          putAttribute("document-format") ++ putEnd
-
       case t if t == typeTag[RequestBuilder.Request.GetJobAttributes] =>
         base ++ putInteger("job-id") ++ putAttribute("requesting-user-name") ++ putEnd
-
-      case t if t == typeTag[CreateJob] =>
-        base ++ putAttribute("requesting-user-name") ++ putAttribute("job-name") ++
-          putAttribute("document-format") ++ putEnd
-      case t if t == typeTag[RequestBuilder.Request.SendDocument] =>
-        base ++ putAttribute("requesting-user-name") ++
-          putAttribute("job-name") ++ putAttribute("document-format") ++ putEnd
-      case _ => throw new WrongRequestType("Wrong Request Type")
+      case _ => throw new IllegalArgumentException("wrong request type")
 
     }
 

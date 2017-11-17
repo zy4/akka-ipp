@@ -15,7 +15,6 @@ object Dependencies {
       "com.typesafe.akka" %% "akka-http"           % akkaHttpV,
       "com.typesafe.akka" %% "akka-http-testkit"   % akkaHttpV % Test,
       "com.typesafe.akka" %% "akka-stream-testkit" % akkaV % Test,
-      "javax.inject"      % "javax.inject"         % "1",
       "org.slf4j"         % "slf4j-api"            % "1.7.25"
     )
 
