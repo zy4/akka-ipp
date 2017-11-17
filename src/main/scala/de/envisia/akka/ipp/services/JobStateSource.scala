@@ -30,7 +30,6 @@ class JobStateSource(jobId: Int, client: IPPClient, config: IppConfig)(implicit 
           completeStage()
         } else {
           logger.info("Waiting")
-          println(value.jobData.jobStateReasons)
           scheduleOnce(None, config.pollingInterval)
         }
       case Failure(t) =>

@@ -70,7 +70,6 @@ class IPPClient(http: HttpExt)(
         Source.single(service.getPrinterAttributes(GetPrinterAttributes.operationId))
 
       case GetJobAttributes(jobId) =>
-        println("GetJobAttributes")
         Source.single(service.getJobAttributes(GetJobAttributes(jobId).operationId, jobId))
 
     }

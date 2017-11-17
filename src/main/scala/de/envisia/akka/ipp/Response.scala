@@ -16,10 +16,8 @@ class Response(bs: ByteString) {
   def getResponse[A <: IppResponse](o: OperationType)(implicit tTag: TypeTag[A]): A = {
     val bb      = bs.asByteBuffer
     val version = Array(bb.get, bb.get)(0)
-    println(s"Version: $version")
     val statusCode = bb.getShort
     val requestId  = bb.getInt
-    println(s"Request ID: $requestId")
 
     @tailrec
     def parseAttributes(groupByte: Byte, attributes: Map[String, List[String]]): Map[String, List[String]] = {
@@ -96,12 +94,8 @@ class Response(bs: ByteString) {
           )
         )
       case x if x == OPERATION_IDS("Cancel-Job") =>
-        println("Cancel-Job")
         CancelJobResponse(o.operationId, version, statusCode, requestId, attrs)
     }
-
-    println(result)
-    //println(attrs.size)
 
     typeOf[A] match {
       case t if t =:= typeOf[GetPrinterAttributesResponse] => result.asInstanceOf[A]
