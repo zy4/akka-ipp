@@ -51,7 +51,8 @@ val config = IppConfig("192.168.123.123", WELL_KNOWN_PORT, "print", Some("userna
 
 // Getting the printer attributes
 
-val attrs = client.printerAttributes(config) // returns the Future of a response object
+val attrs: Future[Response.GetPrinterAttributesResponse] 
+  = client.printerAttributes(config) // returns the Future of a response object
 
 // Printing
 
@@ -59,19 +60,20 @@ import akka.stream.scaladsl.FileIO
 import akka.util.ByteString
 import java.nio.file.{ Files, Paths }
 
-val x = ByteString(Files.readAllBytes(Paths.get("examples/pdf-sample.pdf")))
+val x: ByteString = ByteString(Files.readAllBytes(Paths.get("examples/pdf-sample.pdf")))
 val printJob = client.printJob(x, config)  // returns the Future of a PrintJob response
 
 // Getting the Job Attributes
 
-client.getJobAttributes(42, config) // returns the response data as a Scala Future
+val jobAttrs: Future[Response.GetJobAttributesResponse] 
+  = client.getJobAttributes(42, config) // returns the response data as a Scala Future
 
 // Polling
 
-client.poll(42, config) // polls the state of some job by job id
+val jobData: Future[Response.JobData] = client.poll(42, config) // polls the state of some job by job id
 
-// Canceling a job
+// Cancelling a job
 
-client.cancelJob(42, config)
+val resp: Future[Response.CancelJobResponse] = client.cancelJob(42, config)
 
 ```

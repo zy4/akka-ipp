@@ -1,5 +1,0 @@
-package simple
-
-class BuilderSpec {
-
-}

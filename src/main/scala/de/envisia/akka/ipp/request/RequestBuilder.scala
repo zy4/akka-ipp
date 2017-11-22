@@ -50,16 +50,11 @@ class RequestBuilder[T <: RequestBuilder.Request](
   def addJobAttribute(tag: Byte, name: String, value: String): RequestBuilder[T with JobAttribute] =
     new RequestBuilder[T with JobAttribute](attributes + (name -> (tag, value)))
 
-  // TODO try to replace reflection with the AUX pattern if possible
-
   import scala.reflect.runtime.universe._
 
   def build[A](oid: Byte, reqId: Int)(implicit tag: TypeTag[A]): IppRequest = {
-
     val serializer = new RequestSerializer(this.attributes)
-
     val result = serializer.serialize[A](oid, reqId)
-
     new IppRequest(result)
   }
 
@@ -83,7 +78,6 @@ object RequestBuilder {
     sealed trait JobId              extends Request
     sealed trait JobUri             extends Request
 
-    //type MinimalRequest = EmptyRequest
     type GetPrinterAttributes = EmptyRequest with Charset with Language with PrinterUri
     type CancelJob            = EmptyRequest with Charset with Language with PrinterUri with User with JobUri
     type PrintJob             = EmptyRequest with Charset with Language with PrinterUri with User with JobName with Format

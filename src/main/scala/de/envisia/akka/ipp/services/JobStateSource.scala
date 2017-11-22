@@ -1,21 +1,21 @@
 package de.envisia.akka.ipp.services
 
 import akka.event.slf4j.Logger
-import akka.stream.{ Attributes, Outlet, SourceShape }
+import akka.stream.{Attributes, Outlet, SourceShape}
 import akka.stream.stage._
-import de.envisia.akka.ipp.Response.{ GetJobAttributesResponse, JobData }
+import de.envisia.akka.ipp.Response.{GetJobAttributesResponse, JobData}
 import de.envisia.akka.ipp.model.IppConfig
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 class JobStateSource(jobId: Int, client: IPPClient, config: IppConfig)(implicit ec: ExecutionContext)
     extends GraphStage[SourceShape[JobData]] {
 
   private val out: Outlet[JobData]              = Outlet("JobStatusSource.out")
   override lazy val shape: SourceShape[JobData] = SourceShape.of(out)
-
-  private val logger = Logger("PollingLogger")
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic = new TimerGraphStageLogic(shape) {
 

@@ -22,7 +22,6 @@ class Response(bs: ByteString) {
     @tailrec
     def parseAttributes(groupByte: Byte, attributes: Map[String, List[String]]): Map[String, List[String]] = {
       val byte = bb.get()
-
       if (byte == ATTRIBUTE_GROUPS("end-of-attributes-tag")) {
         attributes
       } else {
@@ -38,28 +37,22 @@ class Response(bs: ByteString) {
             (groupByte, byte)
           }
         }
-
         // name
         val shortLenName = bb.getShort()
         val name         = new String(IppHelper.fromBuffer(bb, shortLenName), StandardCharsets.UTF_8)
-
         // value
         val shortLenValue = bb.getShort()
-
         val value = attrTag match {
           case b if !NUMERIC_TAGS.contains(b) =>
             new String(IppHelper.fromBuffer(bb, shortLenValue), StandardCharsets.UTF_8)
           case _ => ByteBuffer.wrap(IppHelper.fromBuffer(bb, shortLenValue)).getInt.toString
         }
-
         val tag = attributes.get(name)
-
         parseAttributes(newGroup, attributes + (name -> tag.map(v => value :: v).getOrElse(value :: Nil)))
       }
     }
 
     val attrs = parseAttributes(0x01.toByte, Map.empty) //TODO group byte? groupbyte not yet used
-
     val result = o.operationId match {
       case x if x == OPERATION_IDS("Get-Printer-Attributes") =>
         GetPrinterAttributesResponse(o.operationId, version, statusCode, requestId, attrs)
@@ -96,7 +89,6 @@ class Response(bs: ByteString) {
       case x if x == OPERATION_IDS("Cancel-Job") =>
         CancelJobResponse(o.operationId, version, statusCode, requestId, attrs)
     }
-
     typeOf[A] match {
       case t if t =:= typeOf[GetPrinterAttributesResponse] => result.asInstanceOf[A]
       case t if t =:= typeOf[GetJobAttributesResponse]     => result.asInstanceOf[A]
@@ -104,9 +96,7 @@ class Response(bs: ByteString) {
       case t if t =:= typeOf[CancelJobResponse]            => result.asInstanceOf[A]
       case _                                               => throw new IllegalStateException("wrong response type found")
     }
-
   }
-
 }
 
 object Response {

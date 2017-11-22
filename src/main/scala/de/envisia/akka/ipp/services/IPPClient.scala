@@ -59,35 +59,25 @@ class IPPClient(http: HttpExt)(
     val service = new RequestService("ipp://" + config.host, queue = config.queue, requestId = getRequestId)
 
     val body = ev match {
-
       case CancelJob(jobId) =>
         Source.single(service.cancelJob(CancelJob(jobId).operationId, jobId))
-
       case PrintJob(data) =>
         Source.single(service.printJob(PrintJob(data).operationId, data))
-
       case GetPrinterAttributes =>
         Source.single(service.getPrinterAttributes(GetPrinterAttributes.operationId))
-
       case GetJobAttributes(jobId) =>
         Source.single(service.getJobAttributes(GetJobAttributes(jobId).operationId, jobId))
-
     }
 
     val ntt = HttpEntity(ippContentType, body)
-
     val request = HttpRequest(HttpMethods.POST, uri = s"http://${config.host}:${config.port}", entity = ntt)
-
     val response = this.execute(request)
     val result = response.flatMap {
       case HttpResponse(StatusCodes.OK, headers, entity, _) =>
         Unmarshal(entity).to[ByteString]
-
       case resp => Future.failed(new Exception(s"Unexpected status code ${resp.status}"))
     }
-
     result.map(bs => new Response(bs).getResponse[A](ev))
-
   }
 
   def execute(request: HttpRequest): Future[HttpResponse] = http.singleRequest(request)

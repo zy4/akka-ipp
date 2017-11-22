@@ -47,19 +47,14 @@ class RequestSerializer(attributes: Map[String, (Byte, String)] = Map.empty[Stri
       .putByte(ATTRIBUTE_GROUPS("end-of-attributes-tag"))
       .result()
 
-  // TODO try to replace reflection with the AUX pattern if possible
-
   import scala.reflect.runtime.universe._
 
   protected[request] def serialize[A](oid: Byte, reqId: Int)(implicit tag: TypeTag[A]): ByteString = {
-
     val base = putHeader(oid, reqId) ++
       putAttribute("attributes-charset") ++
       putAttribute("attributes-natural-language") ++
       putAttribute("printer-uri")
-
     tag match {
-
       case t if t == typeTag[CancelJob] =>
         base ++ putAttribute("job-uri") ++ putAttribute("requesting-user-name") ++ putEnd
       case t if t == typeTag[GetPrinterAttributes] => base ++ putEnd
@@ -68,12 +63,9 @@ class RequestSerializer(attributes: Map[String, (Byte, String)] = Map.empty[Stri
           putAttribute("requesting-user-name") ++
           putAttribute("job-name") ++
           putAttribute("document-format") ++ putEnd
-
       case t if t == typeTag[RequestBuilder.Request.GetJobAttributes] =>
         base ++ putInteger("job-id") ++ putAttribute("requesting-user-name") ++ putEnd
-
       case _ => throw new IllegalArgumentException("wrong request type")
-
     }
 
   }
