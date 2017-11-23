@@ -1,6 +1,5 @@
 package de.envisia.akka.ipp.services
 
-import akka.event.slf4j.Logger
 import akka.stream.{Attributes, Outlet, SourceShape}
 import akka.stream.stage._
 import de.envisia.akka.ipp.Response.{GetJobAttributesResponse, JobData}
@@ -22,10 +21,7 @@ class JobStateSource(jobId: Int, client: IPPClient, config: IppConfig)(implicit 
     val callback: AsyncCallback[Try[GetJobAttributesResponse]] = getAsyncCallback[Try[GetJobAttributesResponse]] {
       case Success(value) =>
         logger.info("Success")
-        if (value.jobData.jobState == 9 ||
-            value.jobData.jobState == 8 ||
-            value.jobData.jobState == 7 ||
-            value.jobData.jobState == 6) {
+        if ((6 to 9).contains(value.jobData.jobState)) {
           push(out, value.jobData)
           completeStage()
         } else {

@@ -101,7 +101,7 @@ class Response(bs: ByteString) {
 
 object Response {
 
-  trait IppResponse
+  sealed trait IppResponse
 
   case class CancelJobResponse(
       oid: Byte,
