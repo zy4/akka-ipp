@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/zy4/akka-ipp.svg?branch=master)](https://travis-ci.org/zy4/akka-ipp)
 [![Build status](https://ci.appveyor.com/api/projects/status/odbi1gqfas4x5uq6?svg=true)](https://ci.appveyor.com/project/zy4/akka-ipp)
 
 Introduction to akka-ipp
