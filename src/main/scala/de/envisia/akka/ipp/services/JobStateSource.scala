@@ -3,13 +3,13 @@ package de.envisia.akka.ipp.services
 import akka.stream.{Attributes, Outlet, SourceShape}
 import akka.stream.stage._
 import de.envisia.akka.ipp.Response.{GetJobAttributesResponse, JobData}
-import de.envisia.akka.ipp.model.IppConfig
+import de.envisia.akka.ipp.{IPPClient, IPPConfig}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
-class JobStateSource(jobId: Int, client: IPPClient, config: IppConfig)(implicit ec: ExecutionContext)
+private[ipp] class JobStateSource(jobId: Int, client: IPPClient, config: IPPConfig)(implicit ec: ExecutionContext)
     extends GraphStage[SourceShape[JobData]] {
 
   private val out: Outlet[JobData]              = Outlet("JobStatusSource.out")

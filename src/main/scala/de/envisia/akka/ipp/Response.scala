@@ -11,7 +11,7 @@ import de.envisia.akka.ipp.util.IppHelper
 import scala.reflect.runtime.universe._
 import scala.annotation.tailrec
 
-class Response(bs: ByteString) {
+private[ipp] class Response(bs: ByteString) {
 
   def getResponse[A <: IppResponse](o: OperationType)(implicit tTag: TypeTag[A]): A = {
     val bb      = bs.asByteBuffer

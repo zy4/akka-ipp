@@ -34,9 +34,9 @@ Here is a simple usage example:
 
 ```scala
 import de.envisia.akka.ipp.attributes.Attributes.WELL_KNOWN_PORT
-import de.envisia.akka.ipp.services.IPPClient
+import de.envisia.akka.ipp.IPPClient
 import de.envisia.akka.ipp.Response
-import de.envisia.akka.ipp.model.IppConfig
+import de.envisia.akka.ipp.IPPConfig
 
 import akka.actor.ActorSystem
 import akka.stream.{ ActorMaterializer, Materializer }
@@ -50,7 +50,7 @@ implicit val executionContext: ExecutionContext = actorSystem.dispatcher
 
 val http = Http()
 val client = new IPPClient(http)(mat, executionContext)
-val config = IppConfig("192.168.123.123", WELL_KNOWN_PORT, "print", Some("username"), 2.seconds)
+val config = IPPConfig("192.168.123.123", WELL_KNOWN_PORT, "print", Some("username"), 2.seconds) // all params except ip are optional
 
 // Getting the printer attributes
 

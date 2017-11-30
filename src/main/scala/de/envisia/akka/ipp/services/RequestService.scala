@@ -5,7 +5,7 @@ import de.envisia.akka.ipp.request.RequestBuilder.Request._
 import de.envisia.akka.ipp.attributes.Attributes._
 import de.envisia.akka.ipp.request.RequestBuilder
 
-class RequestService(
+private[ipp] class RequestService(
     uri: String,
     lang: String = "en-us",
     user: String = "dummy",
@@ -16,7 +16,7 @@ class RequestService(
     requestId: Int = 1
 ) {
 
-  def cancelJob(operationId: Byte, jobId: Int): ByteString =
+  private[ipp] def cancelJob(operationId: Byte, jobId: Int): ByteString =
     new RequestBuilder[CancelJob]()
       .setCharset(charset)
       .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
@@ -26,7 +26,7 @@ class RequestService(
       .build[CancelJob](operationId, requestId)
       .request
 
-  def getPrinterAttributes(operationId: Byte): ByteString =
+  private[ipp] def getPrinterAttributes(operationId: Byte): ByteString =
     new RequestBuilder[GetPrinterAttributes]()
       .setCharset(charset)
       .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
@@ -34,7 +34,7 @@ class RequestService(
       .build[GetPrinterAttributes](operationId, requestId)
       .request
 
-  def getJobAttributes(operationId: Byte, jobId: Int): ByteString =
+  private[ipp] def getJobAttributes(operationId: Byte, jobId: Int): ByteString =
     new RequestBuilder[GetJobAttributes]()
       .setCharset(charset)
       .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
@@ -44,7 +44,7 @@ class RequestService(
       .build[RequestBuilder.Request.GetJobAttributes](operationId, requestId)
       .request
 
-  def printJob(operationId: Byte, data: ByteString): ByteString =
+  private[ipp] def printJob(operationId: Byte, data: ByteString): ByteString =
     new RequestBuilder[PrintJob]()
       .setCharset(charset)
       .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)

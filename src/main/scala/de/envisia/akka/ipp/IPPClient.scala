@@ -1,21 +1,21 @@
-package de.envisia.akka.ipp.services
+package de.envisia.akka.ipp
 
 import java.util.concurrent.atomic.AtomicInteger
+
 import akka.http.scaladsl.HttpExt
 import akka.http.scaladsl.model.MediaType.NotCompressible
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.{ KillSwitches, Materializer }
+import akka.stream.{KillSwitches, Materializer}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import de.envisia.akka.ipp.OperationType._
 import de.envisia.akka.ipp.Response._
-import de.envisia.akka.ipp._
-import de.envisia.akka.ipp.model.IppConfig
+import de.envisia.akka.ipp.services.{PollingService, RequestService}
 import org.slf4j.LoggerFactory
 
 import scala.reflect.runtime.universe._
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 
 class IPPClient(http: HttpExt)(
@@ -37,22 +37,22 @@ class IPPClient(http: HttpExt)(
 
   private val ippContentType = ContentType(MediaType.customBinary("application", "ipp", NotCompressible))
 
-  def cancelJob(jobId: Int, config: IppConfig): Future[CancelJobResponse] =
+  def cancelJob(jobId: Int, config: IPPConfig): Future[CancelJobResponse] =
     dispatch[CancelJobResponse](CancelJob(jobId), config)
 
-  def printJob(data: ByteString, config: IppConfig): Future[PrintJobResponse] =
+  def printJob(data: ByteString, config: IPPConfig): Future[PrintJobResponse] =
     dispatch[Response.PrintJobResponse](PrintJob(data), config)
 
-  def printerAttributes(config: IppConfig): Future[GetPrinterAttributesResponse] =
+  def printerAttributes(config: IPPConfig): Future[GetPrinterAttributesResponse] =
     dispatch[GetPrinterAttributesResponse](GetPrinterAttributes, config)
 
-  def getJobAttributes[T <: IppResponse](jobId: Int, config: IppConfig): Future[GetJobAttributesResponse] =
+  def getJobAttributes[T <: IppResponse](jobId: Int, config: IPPConfig): Future[GetJobAttributesResponse] =
     dispatch[GetJobAttributesResponse](GetJobAttributes(jobId), config)
 
-  def poll(jobId: Int, config: IppConfig): Future[Response.JobData] =
+  def poll(jobId: Int, config: IPPConfig): Future[Response.JobData] =
     new PollingService(this, killSwitch).poll(jobId, config)
 
-  final protected[services] def dispatch[A <: IppResponse](ev: OperationType, config: IppConfig)(
+  final protected[ipp] def dispatch[A <: IppResponse](ev: OperationType, config: IPPConfig)(
       implicit tag: TypeTag[A]
   ): Future[A] = {
 
