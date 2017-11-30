@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/zy4/akka-ipp.svg?branch=master)](https://travis-ci.org/zy4/akka-ipp)
 [![Build status](https://ci.appveyor.com/api/projects/status/odbi1gqfas4x5uq6?svg=true)](https://ci.appveyor.com/project/zy4/akka-ipp)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3cc32ff259cb4e68a178ac895290a944)](https://www.codacy.com/app/zy4/akka-ipp?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=zy4/akka-ipp&amp;utm_campaign=Badge_Grade)
 
 Introduction to akka-ipp
 =========================
