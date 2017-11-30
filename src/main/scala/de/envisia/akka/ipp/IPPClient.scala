@@ -77,7 +77,7 @@ class IPPClient(http: HttpExt)(
         Unmarshal(entity).to[ByteString]
       case resp => Future.failed(new Exception(s"Unexpected status code ${resp.status}"))
     }
-    result.map(bs => new Response(bs).getResponse[A](ev))
+    result.map(bs => new Response(bs).get[A](ev))
   }
 
   def execute(request: HttpRequest): Future[HttpResponse] = http.singleRequest(request)

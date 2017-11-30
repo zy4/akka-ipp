@@ -13,44 +13,13 @@ import scala.annotation.tailrec
 
 private[ipp] class Response(bs: ByteString) {
 
-  def getResponse[A <: IppResponse](o: OperationType)(implicit tTag: TypeTag[A]): A = {
-    val bb      = bs.asByteBuffer
-    val version = Array(bb.get, bb.get)(0)
+  private[this] val bb = bs.asByteBuffer
+
+  def get[A <: IppResponse](o: OperationType)(implicit tTag: TypeTag[A]): A = {
+
+    val version    = Array(bb.get, bb.get)(0)
     val statusCode = bb.getShort
     val requestId  = bb.getInt
-
-    @tailrec
-    def parseAttributes(groupByte: Byte, attributes: Map[String, List[String]]): Map[String, List[String]] = {
-      val byte = bb.get()
-      if (byte == ATTRIBUTE_GROUPS("end-of-attributes-tag")) {
-        attributes
-      } else {
-        val (newGroup, attrTag) = {
-          if ((0 to 5).contains(byte.toInt)) { // delimiter tag values: https://tools.ietf.org/html/rfc8010#section-3.5.1
-            // group
-            val newGroup = byte
-            // attribute tag
-            val attr = bb.get()
-            (newGroup, attr)
-          } else {
-            // attribute tag
-            (groupByte, byte)
-          }
-        }
-        // name
-        val shortLenName = bb.getShort()
-        val name         = new String(IppHelper.fromBuffer(bb, shortLenName), StandardCharsets.UTF_8)
-        // value
-        val shortLenValue = bb.getShort()
-        val value = attrTag match {
-          case b if !NUMERIC_TAGS.contains(b) =>
-            new String(IppHelper.fromBuffer(bb, shortLenValue), StandardCharsets.UTF_8)
-          case _ => ByteBuffer.wrap(IppHelper.fromBuffer(bb, shortLenValue)).getInt.toString
-        }
-        val tag = attributes.get(name)
-        parseAttributes(newGroup, attributes + (name -> tag.map(v => value :: v).getOrElse(value :: Nil)))
-      }
-    }
 
     val attrs = parseAttributes(0x01.toByte, Map.empty) //TODO group byte? groupbyte not yet used
     val result = o.operationId match {
@@ -64,11 +33,11 @@ private[ipp] class Response(bs: ByteString) {
           requestId,
           attrs,
           JobData(
-            attrs("job-id").head.toInt,
-            attrs("job-state").head.toInt,
-            attrs("job-uri").head,
-            attrs("job-state-reasons").head,
-            attrs("number-of-intervening-jobs").head.toInt
+            attrs("job-id").headOption.map(_.toInt).getOrElse(-1),
+            attrs("job-state").headOption.map(_.toInt).getOrElse(-1),
+            attrs("job-uri").headOption.getOrElse(""),
+            attrs("job-state-reasons").headOption.getOrElse(""),
+            attrs("number-of-intervening-jobs").headOption.map(_.toInt).getOrElse(-1)
           )
         )
       case x if x == OPERATION_IDS("Get-Job-Attributes") =>
@@ -79,11 +48,11 @@ private[ipp] class Response(bs: ByteString) {
           requestId,
           attrs,
           JobData(
-            attrs("job-id").head.toInt,
-            attrs("job-state").head.toInt,
-            attrs("job-uri").head,
-            attrs("job-state-reasons").head,
-            attrs("number-of-intervening-jobs").head.toInt
+            attrs("job-id").headOption.map(_.toInt).getOrElse(-1),
+            attrs("job-state").headOption.map(_.toInt).getOrElse(-1),
+            attrs("job-uri").headOption.getOrElse(""),
+            attrs("job-state-reasons").headOption.getOrElse(""),
+            attrs("number-of-intervening-jobs").headOption.map(_.toInt).getOrElse(-1)
           )
         )
       case x if x == OPERATION_IDS("Cancel-Job") =>
@@ -97,6 +66,43 @@ private[ipp] class Response(bs: ByteString) {
       case _                                               => throw new IllegalStateException("wrong response type found")
     }
   }
+
+  @tailrec
+  private[this] final def parseAttributes(
+      groupByte: Byte,
+      attributes: Map[String, List[String]]
+  ): Map[String, List[String]] = {
+    val byte = bb.get()
+    if (byte == ATTRIBUTE_GROUPS("end-of-attributes-tag")) {
+      attributes
+    } else {
+      val (newGroup, attrTag) = {
+        if ((0 to 5).contains(byte.toInt)) { // delimiter tag values: https://tools.ietf.org/html/rfc8010#section-3.5.1
+          // group
+          val newGroup = byte
+          // attribute tag
+          val attr = bb.get()
+          (newGroup, attr)
+        } else {
+          // attribute tag
+          (groupByte, byte)
+        }
+      }
+      // name
+      val shortLenName = bb.getShort()
+      val name         = new String(IppHelper.fromBuffer(bb, shortLenName), StandardCharsets.UTF_8)
+      // value
+      val shortLenValue = bb.getShort()
+      val value = attrTag match {
+        case b if !NUMERIC_TAGS.contains(b) =>
+          new String(IppHelper.fromBuffer(bb, shortLenValue), StandardCharsets.UTF_8)
+        case _ => ByteBuffer.wrap(IppHelper.fromBuffer(bb, shortLenValue)).getInt.toString
+      }
+      val tag = attributes.get(name)
+      parseAttributes(newGroup, attributes + (name -> tag.map(v => value :: v).getOrElse(value :: Nil)))
+    }
+  }
+
 }
 
 object Response {

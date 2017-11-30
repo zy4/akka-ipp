@@ -2,13 +2,12 @@ package de.envisia.akka.ipp.request
 
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
-
+import scala.reflect.runtime.universe._
 import akka.util.ByteString
 import de.envisia.akka.ipp.attributes.Attributes.{ATTRIBUTE_GROUPS, IPP_VERSION, RESERVED}
 import de.envisia.akka.ipp.request.RequestBuilder.Request.{CancelJob, GetPrinterAttributes}
 
-
-class RequestSerializer(attributes: Map[String, (Byte, String)] = Map.empty[String, (Byte, String)]) {
+private[request] class RequestSerializer(attributes: Map[String, (Byte, String)] = Map.empty[String, (Byte, String)]) {
 
   private implicit val bO: ByteOrder = ByteOrder.BIG_ENDIAN
 
@@ -21,13 +20,16 @@ class RequestSerializer(attributes: Map[String, (Byte, String)] = Map.empty[Stri
       .putByte(ATTRIBUTE_GROUPS("operation-attributes-tag"))
       .result()
   @inline protected[request] final def putAttribute(name: String): ByteString =
-    ByteString.newBuilder
-      .putByte(attributes(name)._1)
-      .putShort(name.length)
-      .putBytes(name.getBytes(StandardCharsets.UTF_8))
-      .putShort(attributes(name)._2.length)
-      .putBytes(attributes(name)._2.getBytes(StandardCharsets.UTF_8))
-      .result()
+    attributes(name) match {
+      case (byte, value) =>
+        ByteString.newBuilder
+          .putByte(byte)
+          .putShort(name.length)
+          .putBytes(name.getBytes(StandardCharsets.UTF_8))
+          .putShort(value.length)
+          .putBytes(value.getBytes(StandardCharsets.UTF_8))
+          .result()
+    }
 
   /**
     * method for inserting the jobId
@@ -35,19 +37,20 @@ class RequestSerializer(attributes: Map[String, (Byte, String)] = Map.empty[Stri
     * @return
     */
   @inline protected[request] final def putInteger(name: String): ByteString =
-    ByteString.newBuilder
-      .putByte(attributes(name)._1)
-      .putShort(name.length)
-      .putBytes(name.getBytes(StandardCharsets.UTF_8))
-      .putShort(4) // MAX INT
-      .putInt(attributes(name)._2.toInt)
-      .result()
+    attributes(name) match {
+      case (byte, value) =>
+        ByteString.newBuilder
+          .putByte(byte)
+          .putShort(name.length)
+          .putBytes(name.getBytes(StandardCharsets.UTF_8))
+          .putShort(4) // MAX INT
+          .putInt(value.toInt)
+          .result()
+    }
   @inline protected[request] val putEnd: ByteString =
     ByteString.newBuilder
       .putByte(ATTRIBUTE_GROUPS("end-of-attributes-tag"))
       .result()
-
-  import scala.reflect.runtime.universe._
 
   protected[request] def serialize[A](oid: Byte, reqId: Int)(implicit tag: TypeTag[A]): ByteString = {
     val base = putHeader(oid, reqId) ++

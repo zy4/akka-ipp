@@ -16,7 +16,7 @@ private[ipp] class RequestService(
     requestId: Int = 1
 ) {
 
-  private[ipp] def cancelJob(operationId: Byte, jobId: Int): ByteString =
+  def cancelJob(operationId: Byte, jobId: Int): ByteString =
     new RequestBuilder[CancelJob]()
       .setCharset(charset)
       .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
@@ -26,7 +26,7 @@ private[ipp] class RequestService(
       .build[CancelJob](operationId, requestId)
       .request
 
-  private[ipp] def getPrinterAttributes(operationId: Byte): ByteString =
+  def getPrinterAttributes(operationId: Byte): ByteString =
     new RequestBuilder[GetPrinterAttributes]()
       .setCharset(charset)
       .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
@@ -34,7 +34,7 @@ private[ipp] class RequestService(
       .build[GetPrinterAttributes](operationId, requestId)
       .request
 
-  private[ipp] def getJobAttributes(operationId: Byte, jobId: Int): ByteString =
+  def getJobAttributes(operationId: Byte, jobId: Int): ByteString =
     new RequestBuilder[GetJobAttributes]()
       .setCharset(charset)
       .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
@@ -44,7 +44,7 @@ private[ipp] class RequestService(
       .build[RequestBuilder.Request.GetJobAttributes](operationId, requestId)
       .request
 
-  private[ipp] def printJob(operationId: Byte, data: ByteString): ByteString =
+  def printJob(operationId: Byte, data: ByteString): ByteString =
     new RequestBuilder[PrintJob]()
       .setCharset(charset)
       .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)

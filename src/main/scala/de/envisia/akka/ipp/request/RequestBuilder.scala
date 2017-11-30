@@ -6,7 +6,7 @@ import de.envisia.akka.ipp.request.RequestBuilder.Request._
 
 final class IppRequest(val request: ByteString) extends AnyVal
 
-class RequestBuilder[T <: RequestBuilder.Request](
+private[ipp] class RequestBuilder[T <: RequestBuilder.Request](
     attributes: Map[String, (Byte, String)] = Map.empty[String, (Byte, String)]
 ) {
 
