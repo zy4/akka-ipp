@@ -6,7 +6,7 @@ crossScalaVersions := Seq("2.12.4", "2.11.11" ,"2.13.0-M2")
 
 lazy val root = (project in file("."))
   .settings(
-    libraryDependencies ++= Dependencies.commonDeps ++ Seq("org.scala-lang" % "scala-reflect" % scalaVersion.value)
+    libraryDependencies ++= Dependencies.commonDeps ++ Seq(scalaOrganization.value % "scala-reflect" % scalaVersion.value)
   )
 
 scalacOptions := Seq(
