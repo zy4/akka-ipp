@@ -14,43 +14,56 @@ private[ipp] class RequestBuilder[T <: RequestBuilder.Request](
   /**
     * common setters
     */
-  def setCharset(charset: String): RequestBuilder[T with Charset] =
-    new RequestBuilder(attributes + ("attributes-charset" -> (ATTRIBUTE_TAGS("attributes-charset"), charset)))
-  def setUri(uri: String): RequestBuilder[T with PrinterUri] =
-    new RequestBuilder(attributes + ("printer-uri" -> (ATTRIBUTE_TAGS("printer-uri"), uri)))
-  def setLanguage(lang: String): RequestBuilder[T with Language] =
-    new RequestBuilder(
-      attributes + ("attributes-natural-language" -> (ATTRIBUTE_TAGS("attributes-natural-language"), lang))
-    )
+  def setCharset(charset: String): RequestBuilder[T with Charset] = {
+    val tpl = (ATTRIBUTE_TAGS("attributes-charset"), charset)
+    new RequestBuilder(attributes + ("attributes-charset" -> tpl))
+  }
+  def setUri(uri: String): RequestBuilder[T with PrinterUri] = {
+    val tpl = (ATTRIBUTE_TAGS("printer-uri"), uri)
+    new RequestBuilder(attributes + ("printer-uri" -> tpl))
+  }
+  def setLanguage(lang: String): RequestBuilder[T with Language] = {
+    val tpl = (ATTRIBUTE_TAGS("attributes-natural-language"), lang)
+    new RequestBuilder(attributes + ("attributes-natural-language" -> tpl))
+  }
 
-  def setJobUri(jobUri: String): RequestBuilder[T with JobUri] =
-    new RequestBuilder(
-      attributes + ("job-uri" -> (ATTRIBUTE_TAGS("job-uri"), jobUri))
-    )
+  def setJobUri(jobUri: String): RequestBuilder[T with JobUri] = {
+    val tpl = (ATTRIBUTE_TAGS("job-uri"), jobUri)
+    new RequestBuilder(attributes + ("job-uri" -> tpl))
+  }
 
-  def setUser(user: String): RequestBuilder[T with User] =
-    new RequestBuilder(attributes + ("requesting-user-name" -> (ATTRIBUTE_TAGS("requesting-user-name"), user)))
-
-  def setJobName(jobName: String): RequestBuilder[T with JobName] =
-    new RequestBuilder(attributes + ("job-name" -> (ATTRIBUTE_TAGS("job-name"), jobName)))
-
-  def setFormat(format: String): RequestBuilder[T with Format] =
-    new RequestBuilder(attributes + ("document-format" -> (ATTRIBUTE_TAGS("document-format"), format)))
-
-  def askWithJobId(jobId: Int): RequestBuilder[T with JobId] =
-    new RequestBuilder(attributes + ("job-id" -> (ATTRIBUTE_TAGS("job-id"), jobId.toString)))
+  def setUser(user: String): RequestBuilder[T with User] = {
+    val tpl = (ATTRIBUTE_TAGS("requesting-user-name"), user)
+    new RequestBuilder(attributes + ("requesting-user-name" -> tpl))
+  }
+  def setJobName(jobName: String): RequestBuilder[T with JobName] = {
+    val tpl = (ATTRIBUTE_TAGS("job-name"), jobName)
+    new RequestBuilder(attributes + ("job-name" -> tpl))
+  }
+  def setFormat(format: String): RequestBuilder[T with Format] = {
+    val tpl = (ATTRIBUTE_TAGS("document-format"), format)
+    new RequestBuilder(attributes + ("document-format" -> tpl))
+  }
+  def askWithJobId(jobId: Int): RequestBuilder[T with JobId] = {
+    val tpl = (ATTRIBUTE_TAGS("job-id"), jobId.toString)
+    new RequestBuilder(attributes + ("job-id" -> tpl))
+  }
 
   /**
     *  more general setters
     */
-  def addOperationAttribute(tag: Byte, name: String, value: String): RequestBuilder[T with OperationAttribute] =
-    new RequestBuilder[T with OperationAttribute](attributes + (name -> (tag, value)))
+  def addOperationAttribute(tag: Byte, name: String, value: String): RequestBuilder[T with OperationAttribute] = {
+    val tpl = (tag, value)
+    new RequestBuilder[T with OperationAttribute](attributes + (name -> tpl))
+  }
 
-  def addJobAttribute(tag: Byte, name: String, value: String): RequestBuilder[T with JobAttribute] =
-    new RequestBuilder[T with JobAttribute](attributes + (name -> (tag, value)))
+  def addJobAttribute(tag: Byte, name: String, value: String): RequestBuilder[T with JobAttribute] = {
+    val tpl = (tag, value)
+    new RequestBuilder[T with JobAttribute](attributes + (name -> tpl))
+  }
 
   def build[A](oid: Byte, reqId: Int)(implicit tag: TypeTag[A]): IppRequest = {
-    val serializer = new RequestSerializer(this.attributes)
+    val serializer = new RequestSerializer(attributes)
     val result     = serializer.serialize[A](oid, reqId)
     new IppRequest(result)
   }
