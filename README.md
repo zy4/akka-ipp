@@ -6,11 +6,11 @@ Introduction to akka-ipp
 =========================
 
 This library allows for basic tcp queries by targeting the [IPP/2.0](https://en.wikipedia.org/wiki/Internet_Printing_Protocol) specifications. 
-There are still many features which are missing but it can already be used to query 
+There are still many features which are missing but akka-ipp can already be used to 
 
-* a printer's capabilities
+* query a printer's capabilities
 * submit a job
-* query the status of the job
+* query the status of a job
 * cancel jobs
 * do some polling on the job state
 

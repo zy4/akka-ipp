@@ -19,7 +19,7 @@ private[request] class RequestSerializer(attributes: Map[String, (Byte, String)]
       .putInt(requestId)
       .putByte(ATTRIBUTE_GROUPS("operation-attributes-tag"))
       .result()
-  @inline protected[request] final def putAttribute(name: String): ByteString =
+  protected[request] final def putAttribute(name: String): ByteString =
     attributes(name) match {
       case (byte, value) =>
         ByteString.newBuilder
@@ -29,6 +29,7 @@ private[request] class RequestSerializer(attributes: Map[String, (Byte, String)]
           .putShort(value.length)
           .putBytes(value.getBytes(StandardCharsets.UTF_8))
           .result()
+      case _ => throw new IllegalStateException("could not serialize malformed request")
     }
 
   /**
@@ -36,7 +37,7 @@ private[request] class RequestSerializer(attributes: Map[String, (Byte, String)]
     * @param name
     * @return
     */
-  @inline protected[request] final def putInteger(name: String): ByteString =
+  protected[request] final def putInteger(name: String): ByteString =
     attributes(name) match {
       case (byte, value) =>
         ByteString.newBuilder
@@ -46,6 +47,7 @@ private[request] class RequestSerializer(attributes: Map[String, (Byte, String)]
           .putShort(4) // MAX INT
           .putInt(value.toInt)
           .result()
+      case _ => throw new IllegalStateException("could not serialize malformed request")
     }
   @inline protected[request] val putEnd: ByteString =
     ByteString.newBuilder
