@@ -24,11 +24,11 @@ private[ipp] class Response(bs: ByteString) {
     val attrs = parseAttributes(0x01.toByte, Map.empty) //TODO group byte? groupbyte not yet used
     val result = o.operationId match {
       case x if x == OPERATION_IDS("Get-Printer-Attributes") =>
-        GetPrinterAttributesResponse(o.operationId, version, statusCode, requestId, attrs)
+        GetPrinterAttributesResponse(o.operationId, version.toShort, statusCode, requestId, attrs)
       case x if x == OPERATION_IDS("Print-Job") =>
         PrintJobResponse(
           o.operationId,
-          version,
+          version.toShort,
           statusCode,
           requestId,
           attrs,
@@ -43,7 +43,7 @@ private[ipp] class Response(bs: ByteString) {
       case x if x == OPERATION_IDS("Get-Job-Attributes") =>
         GetJobAttributesResponse(
           o.operationId,
-          version,
+          version.toShort,
           statusCode,
           requestId,
           attrs,
@@ -56,7 +56,7 @@ private[ipp] class Response(bs: ByteString) {
           )
         )
       case x if x == OPERATION_IDS("Cancel-Job") =>
-        CancelJobResponse(o.operationId, version, statusCode, requestId, attrs)
+        CancelJobResponse(o.operationId, version.toShort, statusCode, requestId, attrs)
     }
     typeOf[A] match {
       case t if t =:= typeOf[GetPrinterAttributesResponse] => result.asInstanceOf[A]
@@ -90,13 +90,13 @@ private[ipp] class Response(bs: ByteString) {
       }
       // name
       val shortLenName = bb.getShort()
-      val name         = new String(IppHelper.fromBuffer(bb, shortLenName), StandardCharsets.UTF_8)
+      val name         = new String(IppHelper.fromBuffer(bb, shortLenName.toInt), StandardCharsets.UTF_8)
       // value
       val shortLenValue = bb.getShort()
       val value = attrTag match {
         case b if !NUMERIC_TAGS.contains(b) =>
-          new String(IppHelper.fromBuffer(bb, shortLenValue), StandardCharsets.UTF_8)
-        case _ => ByteBuffer.wrap(IppHelper.fromBuffer(bb, shortLenValue)).getInt.toString
+          new String(IppHelper.fromBuffer(bb, shortLenValue.toInt), StandardCharsets.UTF_8)
+        case _ => ByteBuffer.wrap(IppHelper.fromBuffer(bb, shortLenValue.toInt)).getInt.toString
       }
       val tag = attributes.get(name)
       parseAttributes(newGroup, attributes + (name -> tag.map(v => value :: v).getOrElse(value :: Nil)))

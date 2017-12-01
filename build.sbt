@@ -10,15 +10,19 @@ lazy val root = (project in file("."))
   )
 
 scalacOptions := Seq(
-  "-unchecked",
-  "-feature",
-  "-language:implicitConversions",
-  "-language:higherKinds",
-  "-language:existentials",
-  "-language:postfixOps",
   "-deprecation",
-  "-encoding",
-  "utf8"
+  "-encoding", "UTF-8",
+  "-feature",
+  "-language:existentials",
+  "-language:higherKinds",
+  "-language:implicitConversions",
+  "-unchecked",
+  "-Xfatal-warnings",
+  //"-Yno-adapted-args",
+  "-Ywarn-dead-code",
+  "-Ywarn-numeric-widen",
+  "-Ywarn-value-discard",
+  "-Xfuture"
 )
 
 publishMavenStyle in ThisBuild := true

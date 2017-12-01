@@ -26,7 +26,6 @@ object Main {
     val client =
       new IPPClient(http)(mat, executionContext)
 
-
     val config = IPPConfig("192.168.179.149")
 
     //val x        = ByteString(Files.readAllBytes(Paths.get("examples/pdf-sample.pdf")))
@@ -35,12 +34,10 @@ object Main {
 
     //val x = client.poll(158, config)
 
-
     //val z = client.cancelJob(158, config)
 
     //Await.result(z, 10.seconds)
     //val y = Await.result(x, 10.seconds)
-
 
     val jobs = for (i <- 1 to 2) yield {
       if (i % 10 == 0)
@@ -53,10 +50,7 @@ object Main {
     //val checkJob = client.getJobAttributes(102)
     //Await.result(checkJob, 10.seconds)
 
-
-
-    http.shutdownAllConnectionPools()
-    actorSystem.terminate()
+    http.shutdownAllConnectionPools().onComplete(_ => actorSystem.terminate())
 
   }
 

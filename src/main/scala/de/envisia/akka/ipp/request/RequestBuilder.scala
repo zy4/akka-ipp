@@ -3,6 +3,7 @@ package de.envisia.akka.ipp.request
 import akka.util.ByteString
 import de.envisia.akka.ipp.attributes.Attributes._
 import de.envisia.akka.ipp.request.RequestBuilder.Request._
+import scala.reflect.runtime.universe._
 
 final class IppRequest(val request: ByteString) extends AnyVal
 
@@ -15,10 +16,8 @@ private[ipp] class RequestBuilder[T <: RequestBuilder.Request](
     */
   def setCharset(charset: String): RequestBuilder[T with Charset] =
     new RequestBuilder(attributes + ("attributes-charset" -> (ATTRIBUTE_TAGS("attributes-charset"), charset)))
-
   def setUri(uri: String): RequestBuilder[T with PrinterUri] =
     new RequestBuilder(attributes + ("printer-uri" -> (ATTRIBUTE_TAGS("printer-uri"), uri)))
-
   def setLanguage(lang: String): RequestBuilder[T with Language] =
     new RequestBuilder(
       attributes + ("attributes-natural-language" -> (ATTRIBUTE_TAGS("attributes-natural-language"), lang))
@@ -50,11 +49,9 @@ private[ipp] class RequestBuilder[T <: RequestBuilder.Request](
   def addJobAttribute(tag: Byte, name: String, value: String): RequestBuilder[T with JobAttribute] =
     new RequestBuilder[T with JobAttribute](attributes + (name -> (tag, value)))
 
-  import scala.reflect.runtime.universe._
-
   def build[A](oid: Byte, reqId: Int)(implicit tag: TypeTag[A]): IppRequest = {
     val serializer = new RequestSerializer(this.attributes)
-    val result = serializer.serialize[A](oid, reqId)
+    val result     = serializer.serialize[A](oid, reqId)
     new IppRequest(result)
   }
 
