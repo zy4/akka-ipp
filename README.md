@@ -86,7 +86,7 @@ val resp: Future[Response.CancelJobResponse] = client.cancelJob(42, config)
 
 Usage with Dependency Injection (Guice) in PLAY
 ===============================================
-You can also use the library via DI, for example from your PLAY app.
+You can also use the library via DI, for example in your PLAY app.
 
 ```scala
 
