@@ -82,21 +82,13 @@ val resp: Future[Response.CancelJobResponse] = client.cancelJob(42, config)
 
 ```
 
+
+
 Usage with Dependency Injection (Guice) in PLAY
 ===============================================
 You can also use the library via DI, for example from your PLAY app.
 
 ```scala
-
-import javax.inject.{Inject, Provider, Singleton}
-
-import akka.actor.ActorSystem
-import akka.http.scaladsl.{Http, HttpExt}
-import akka.stream.Materializer
-import de.envisia.akka.ipp.IPPClient
-import play.api.inject.ApplicationLifecycle
-
-import scala.concurrent.ExecutionContext
 
 @Singleton
 class HttpExtProvider @Inject()(
