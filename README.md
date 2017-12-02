@@ -81,3 +81,66 @@ val jobData: Future[Response.JobData] = client.poll(42, config) // polls the sta
 val resp: Future[Response.CancelJobResponse] = client.cancelJob(42, config)
 
 ```
+
+Usage with Dependency Injection (Guice) in PLAY
+===============================================
+You can also use the library via DI, for example from your PLAY app.
+
+```scala
+
+import javax.inject.{Inject, Provider, Singleton}
+
+import akka.actor.ActorSystem
+import akka.http.scaladsl.{Http, HttpExt}
+import akka.stream.Materializer
+import de.envisia.akka.ipp.IPPClient
+import play.api.inject.ApplicationLifecycle
+
+import scala.concurrent.ExecutionContext
+
+@Singleton
+class HttpExtProvider @Inject()(
+  applicationLifecycle: ApplicationLifecycle
+)(implicit actorSystem: ActorSystem, val executionContext: ExecutionContext, val mat: Materializer)
+  extends Provider[HttpExt] {
+
+  override lazy val get: HttpExt = {
+    val innerHttp = Http()
+    applicationLifecycle.addStopHook(() => innerHttp.shutdownAllConnectionPools())
+    innerHttp
+  }
+
+}
+
+@Singleton
+class IppClientProvider @Inject()(
+    http: HttpExt,
+    applicationLifecycle: ApplicationLifecycle
+)(implicit val executionContext: ExecutionContext, val mat: Materializer)
+    extends Provider[IPPClient] {
+
+  override lazy val get: IPPClient = {
+    val innerClient = new IPPClient(http)
+    applicationLifecycle.addStopHook(() => innerClient.shutdown())
+    innerClient
+  }
+
+}
+
+
+```
+
+Now you can just bind the IPPClient to the Provider:
+
+```scala
+
+class YourModule extends AbstractModule with AkkaGuiceSupport {
+  override def configure(): Unit = {
+    // IPP Printing Client
+    bind(classOf[IPPClient]).toProvider(classOf[IppClientProvider])
+    // Akka HttpExt
+    bind(classOf[HttpExt]).toProvider(classOf[HttpExtProvider])
+  }
+}
+
+```
