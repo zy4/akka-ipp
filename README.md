@@ -51,8 +51,10 @@ implicit val executionContext: ExecutionContext = actorSystem.dispatcher
 
 val http = Http()
 val client = new IPPClient(http)(mat, executionContext)
-val config = IPPConfig("192.168.123.123", WELL_KNOWN_PORT, "print", Some("username"), 2.seconds) // all params except ip are optional
 
+// all params except ip are optional
+val config  = IPPConfig("192.168.123.123", WELL_KNOWN_PORT, "print", Some("username"), 2.seconds) 
+  
 // Getting the printer attributes
 
 val attrs: Future[Response.GetPrinterAttributesResponse] 
