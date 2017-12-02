@@ -2,14 +2,15 @@ package de.envisia.akka.ipp.request
 
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
+
 import scala.reflect.runtime.universe._
 import akka.util.ByteString
 import de.envisia.akka.ipp.attributes.Attributes.{ATTRIBUTE_GROUPS, IPP_VERSION, RESERVED}
-import de.envisia.akka.ipp.request.RequestBuilder.Request.{CancelJob, GetPrinterAttributes}
+import de.envisia.akka.ipp.request.RequestBuilder.Request.{CancelJob, GetJobAttributes, GetPrinterAttributes, PrintJob}
 
 private[request] class RequestSerializer(attributes: Map[String, (Byte, String)] = Map.empty[String, (Byte, String)]) {
 
-  private implicit val bO: ByteOrder = ByteOrder.BIG_ENDIAN
+  private[this] implicit val bO: ByteOrder = ByteOrder.BIG_ENDIAN
 
   // generic byte strings
   @inline protected[request] final def putHeader(operationId: Byte, requestId: Int): ByteString =
@@ -63,12 +64,12 @@ private[request] class RequestSerializer(attributes: Map[String, (Byte, String)]
       case t if t == typeTag[CancelJob] =>
         base ++ putAttribute("job-uri") ++ putAttribute("requesting-user-name") ++ putEnd
       case t if t == typeTag[GetPrinterAttributes] => base ++ putEnd
-      case t if t == typeTag[RequestBuilder.Request.PrintJob] =>
+      case t if t == typeTag[PrintJob] =>
         base ++
           putAttribute("requesting-user-name") ++
           putAttribute("job-name") ++
           putAttribute("document-format") ++ putEnd
-      case t if t == typeTag[RequestBuilder.Request.GetJobAttributes] =>
+      case t if t == typeTag[GetJobAttributes] =>
         base ++ putInteger("job-id") ++ putAttribute("requesting-user-name") ++ putEnd
       case _ => throw new IllegalArgumentException("wrong request type")
     }
