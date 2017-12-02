@@ -2,10 +2,10 @@ package de.envisia.akka.ipp.request
 
 import akka.util.ByteString
 import de.envisia.akka.ipp.attributes.Attributes._
+import de.envisia.akka.ipp.request.RequestBuilder.IppRequest
 import de.envisia.akka.ipp.request.RequestBuilder.Request._
-import scala.reflect.runtime.universe._
 
-final class IppRequest(val request: ByteString) extends AnyVal
+import scala.reflect.runtime.universe._
 
 private[ipp] class RequestBuilder[T <: RequestBuilder.Request](
     attributes: Map[String, (Byte, String)] = Map.empty[String, (Byte, String)]
@@ -71,6 +71,8 @@ private[ipp] class RequestBuilder[T <: RequestBuilder.Request](
 }
 
 object RequestBuilder {
+
+  protected[RequestBuilder] final class IppRequest(val request: ByteString) extends AnyVal
 
   sealed trait Request
 

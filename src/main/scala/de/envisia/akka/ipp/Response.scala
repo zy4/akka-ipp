@@ -6,6 +6,8 @@ import java.nio.charset.StandardCharsets
 import akka.util.ByteString
 import de.envisia.akka.ipp.Response._
 import de.envisia.akka.ipp.attributes.Attributes._
+import de.envisia.akka.ipp.attributes.IPPValue
+import de.envisia.akka.ipp.attributes.IPPValue.{NumericVal, TextVal}
 import de.envisia.akka.ipp.util.IppHelper
 
 import scala.reflect.runtime.universe._
@@ -33,11 +35,11 @@ private[ipp] class Response(bs: ByteString) {
           requestId,
           attrs,
           JobData(
-            attrs("job-id").headOption.map(_.toInt).getOrElse(-1),
-            attrs("job-state").headOption.map(_.toInt).getOrElse(-1),
-            attrs("job-uri").headOption.getOrElse(""),
-            attrs("job-state-reasons").headOption.getOrElse(""),
-            attrs("number-of-intervening-jobs").headOption.map(_.toInt).getOrElse(-1)
+            attrs("job-id").headOption.map(_.asInstanceOf[NumericVal].value).getOrElse(-1),
+            attrs("job-state").headOption.map(_.asInstanceOf[NumericVal].value).getOrElse(-1),
+            attrs("job-uri").headOption.map(_.asInstanceOf[TextVal].value).getOrElse(""),
+            attrs("job-state-reasons").headOption.map(_.asInstanceOf[TextVal].value).getOrElse(""),
+            attrs("number-of-intervening-jobs").headOption.map(_.asInstanceOf[NumericVal].value).getOrElse(-1)
           )
         )
       case x if x == OPERATION_IDS("Get-Job-Attributes") =>
@@ -48,11 +50,11 @@ private[ipp] class Response(bs: ByteString) {
           requestId,
           attrs,
           JobData(
-            attrs("job-id").headOption.map(_.toInt).getOrElse(-1),
-            attrs("job-state").headOption.map(_.toInt).getOrElse(-1),
-            attrs("job-uri").headOption.getOrElse(""),
-            attrs("job-state-reasons").headOption.getOrElse(""),
-            attrs("number-of-intervening-jobs").headOption.map(_.toInt).getOrElse(-1)
+            attrs("job-id").headOption.map(_.asInstanceOf[NumericVal].value).getOrElse(-1),
+            attrs("job-state").headOption.map(_.asInstanceOf[NumericVal].value).getOrElse(-1),
+            attrs("job-uri").headOption.map(_.asInstanceOf[TextVal].value).getOrElse(""),
+            attrs("job-state-reasons").headOption.map(_.asInstanceOf[TextVal].value).getOrElse(""),
+            attrs("number-of-intervening-jobs").headOption.map(_.asInstanceOf[NumericVal].value).getOrElse(-1)
           )
         )
       case x if x == OPERATION_IDS("Cancel-Job") =>
@@ -70,8 +72,8 @@ private[ipp] class Response(bs: ByteString) {
   @tailrec
   private[this] final def parseAttributes(
       groupByte: Byte,
-      attributes: Map[String, List[String]]
-  ): Map[String, List[String]] = {
+      attributes: Map[String, List[IPPValue]]
+  ): Map[String, List[IPPValue]] = {
     val byte = bb.get()
     if (byte == ATTRIBUTE_GROUPS("end-of-attributes-tag")) {
       attributes
@@ -95,8 +97,9 @@ private[ipp] class Response(bs: ByteString) {
       val shortLenValue = bb.getShort()
       val value = attrTag match {
         case b if !NUMERIC_TAGS.contains(b) =>
-          new String(IppHelper.fromBuffer(bb, shortLenValue.toInt), StandardCharsets.UTF_8)
-        case _ => ByteBuffer.wrap(IppHelper.fromBuffer(bb, shortLenValue.toInt)).getInt.toString
+          TextVal(new String(IppHelper.fromBuffer(bb, shortLenValue.toInt), StandardCharsets.UTF_8))
+        case _ =>
+          NumericVal(ByteBuffer.wrap(IppHelper.fromBuffer(bb, shortLenValue.toInt)).getInt) // TODO find out the value-tags of other types and continue pattern matching on them
       }
       val tag = attributes.get(name)
       parseAttributes(newGroup, attributes + (name -> tag.map(v => value :: v).getOrElse(value :: Nil)))
@@ -114,7 +117,7 @@ object Response {
       version: Short,
       statusCode: Short,
       requestId: Int,
-      attributes: Map[String, List[String]]
+      attributes: Map[String, List[IPPValue]]
   ) extends IppResponse
 
   case class GetPrinterAttributesResponse(
@@ -122,7 +125,7 @@ object Response {
       version: Short,
       statusCode: Short,
       requestId: Int,
-      attributes: Map[String, List[String]]
+      attributes: Map[String, List[IPPValue]]
   ) extends IppResponse
 
   case class GetJobAttributesResponse(
@@ -130,7 +133,7 @@ object Response {
       version: Short,
       statusCode: Short,
       requestId: Int,
-      attributes: Map[String, List[String]],
+      attributes: Map[String, List[IPPValue]],
       jobData: JobData
   ) extends IppResponse
 
@@ -139,7 +142,7 @@ object Response {
       version: Short,
       statusCode: Short,
       requestId: Int,
-      attributes: Map[String, List[String]],
+      attributes: Map[String, List[IPPValue]],
       jobData: JobData
   ) extends IppResponse
 
