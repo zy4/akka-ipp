@@ -7,8 +7,8 @@ scala:
 - 2.12.4
 before_install:
   - git submodule update --init --recursive
-  - sh docker-cups-pdf/build.sh
-  - sh docker-cups-pdf/run.sh
+  - sh src/test/docker-cups-pdf/build.sh
+  - sh src/test/docker-cups-pdf/run.sh
 script:
 - sbt test:run
 jdk:
