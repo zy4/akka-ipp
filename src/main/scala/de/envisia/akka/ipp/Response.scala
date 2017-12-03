@@ -60,7 +60,6 @@ private[ipp] class Response(bs: ByteString) {
       case x if x == OPERATION_IDS("Cancel-Job") =>
         CancelJobResponse(o.operationId, version.toShort, statusCode, requestId, attrs)
     }
-    println(result)
     typeOf[A] match {
       case t if t =:= typeOf[GetPrinterAttributesResponse] => result.asInstanceOf[A]
       case t if t =:= typeOf[GetJobAttributesResponse]     => result.asInstanceOf[A]

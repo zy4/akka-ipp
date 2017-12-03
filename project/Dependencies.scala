@@ -9,7 +9,7 @@ object Dependencies {
 
   lazy val commonDeps =
     Seq(
-      "org.scalatest"     %% "scalatest"           % scalaTestV % Test,
+      "com.lihaoyi"       %% "utest"               % "0.6.0" % Test,
       "com.typesafe.akka" %% "akka-actor"          % akkaV,
       "com.typesafe.akka" %% "akka-slf4j"          % akkaV,
       "com.typesafe.akka" %% "akka-stream"         % akkaV,

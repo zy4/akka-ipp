@@ -2,7 +2,7 @@ package de.envisia.akka.ipp.attributes
 
 sealed trait IPPValue
 
-private[ipp] object IPPValue {
+object IPPValue {
 
   case class NumericVal(value: Int) extends IPPValue
 

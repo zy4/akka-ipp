@@ -25,6 +25,7 @@ scalacOptions := Seq(
   "-Xfuture"
 )
 
+testFrameworks += new TestFramework("utest.runner.Framework")
 publishMavenStyle in ThisBuild := true
 pomIncludeRepository in ThisBuild := { _ => false }
 updateOptions := updateOptions.value.withGigahorse(false)
