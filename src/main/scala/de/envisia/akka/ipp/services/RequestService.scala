@@ -19,17 +19,17 @@ private[ipp] class RequestService(
   def cancelJob(operationId: Byte, jobId: Int): ByteString =
     new RequestBuilder[CancelJob]()
       .setCharset(charset)
-      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
+      .setUri(this.uri + s"$WELL_KNOWN_PORT" + queue)
       .setLanguage(lang)
       .setUser(user)
-      .setJobUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue + "/job-" + jobId)
+      .setJobUri(this.uri + s"$WELL_KNOWN_PORT" + queue + "/job-" + jobId)
       .build[CancelJob](operationId, requestId)
       .request
 
   def getPrinterAttributes(operationId: Byte): ByteString =
     new RequestBuilder[GetPrinterAttributes]()
       .setCharset(charset)
-      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
+      .setUri(this.uri + s"$WELL_KNOWN_PORT" + queue)
       .setLanguage(lang)
       .build[GetPrinterAttributes](operationId, requestId)
       .request
@@ -37,7 +37,7 @@ private[ipp] class RequestService(
   def getJobAttributes(operationId: Byte, jobId: Int): ByteString =
     new RequestBuilder[GetJobAttributes]()
       .setCharset(charset)
-      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
+      .setUri(this.uri + s"$WELL_KNOWN_PORT" + queue)
       .setLanguage(lang)
       .askWithJobId(jobId)
       .setUser(user)
@@ -47,7 +47,7 @@ private[ipp] class RequestService(
   def printJob(operationId: Byte, data: ByteString): ByteString =
     new RequestBuilder[PrintJob]()
       .setCharset(charset)
-      .setUri(this.uri + s"$WELL_KNOWN_PORT/ipp/" + queue)
+      .setUri(this.uri + s"$WELL_KNOWN_PORT" + queue)
       .setLanguage(lang)
       .setUser(user)
       .setJobName(jobName)

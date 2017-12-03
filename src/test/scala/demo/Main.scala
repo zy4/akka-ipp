@@ -26,7 +26,7 @@ object Main {
     val client =
       new IPPClient(http)(mat, executionContext)
 
-    val config = IPPConfig("192.168.179.149")
+    val config = IPPConfig("localhost", port=6632, queue="/printers/cups-pdf")
 
     //val x        = ByteString(Files.readAllBytes(Paths.get("examples/pdf-sample.pdf")))
     //val printJob = client.printJob(x, config)

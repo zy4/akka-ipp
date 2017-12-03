@@ -1,0 +1,3 @@
+[submodule "docker-cups-pdf"]
+	path = docker-cups-pdf
+	url = https://github.com/zy4/docker-cups-pdf.git

@@ -1,10 +1,16 @@
 language: scala
-sudo: false
+sudo: required
+services:
+  - docker
 scala:
 - 2.11.11
 - 2.12.4
+before_install:
+  - git submodule update --init --recursive
+  - sh docker-cups-pdf/build.sh
+  - sh docker-cups-pdf/run.sh
 script:
-- sbt ++$TRAVIS_SCALA_VERSION ${TARGET}
+- sbt test:run
 jdk:
 - oraclejdk8
 cache:
