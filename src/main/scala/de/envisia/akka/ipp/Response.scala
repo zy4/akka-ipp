@@ -38,8 +38,7 @@ private[ipp] class Response(bs: ByteString) {
             attrs("job-id").headOption.map(_.asInstanceOf[NumericVal].value).getOrElse(-1),
             attrs("job-state").headOption.map(_.asInstanceOf[NumericVal].value).getOrElse(-1),
             attrs("job-uri").headOption.map(_.asInstanceOf[TextVal].value).getOrElse(""),
-            attrs("job-state-reasons").headOption.map(_.asInstanceOf[TextVal].value).getOrElse(""),
-            attrs("number-of-intervening-jobs").headOption.map(_.asInstanceOf[NumericVal].value).getOrElse(-1)
+            attrs("job-state-reasons").headOption.map(_.asInstanceOf[TextVal].value).getOrElse("")
           )
         )
       case x if x == OPERATION_IDS("Get-Job-Attributes") =>
@@ -53,13 +52,13 @@ private[ipp] class Response(bs: ByteString) {
             attrs("job-id").headOption.map(_.asInstanceOf[NumericVal].value).getOrElse(-1),
             attrs("job-state").headOption.map(_.asInstanceOf[NumericVal].value).getOrElse(-1),
             attrs("job-uri").headOption.map(_.asInstanceOf[TextVal].value).getOrElse(""),
-            attrs("job-state-reasons").headOption.map(_.asInstanceOf[TextVal].value).getOrElse(""),
-            attrs("number-of-intervening-jobs").headOption.map(_.asInstanceOf[NumericVal].value).getOrElse(-1)
+            attrs("job-state-reasons").headOption.map(_.asInstanceOf[TextVal].value).getOrElse("")
           )
         )
       case x if x == OPERATION_IDS("Cancel-Job") =>
         CancelJobResponse(o.operationId, version.toShort, statusCode, requestId, attrs)
     }
+    println(result)
     typeOf[A] match {
       case t if t =:= typeOf[GetPrinterAttributesResponse] => result.asInstanceOf[A]
       case t if t =:= typeOf[GetJobAttributesResponse]     => result.asInstanceOf[A]
@@ -150,8 +149,7 @@ object Response {
       jobID: Int,
       jobState: Int,
       jobURI: String,
-      jobStateReasons: String,
-      numberOfInterveningJobs: Int
+      jobStateReasons: String
   )
 
 }

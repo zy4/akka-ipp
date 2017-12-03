@@ -41,7 +41,7 @@ private[ipp] class RequestService(
       .setLanguage(lang)
       .askWithJobId(jobId)
       .setUser(user)
-      .build[RequestBuilder.Request.GetJobAttributes](operationId, requestId)
+      .build[GetJobAttributes](operationId, requestId)
       .request
 
   def printJob(operationId: Byte, data: ByteString): ByteString =
@@ -52,6 +52,6 @@ private[ipp] class RequestService(
       .setUser(user)
       .setJobName(jobName)
       .setFormat(format)
-      .build[RequestBuilder.Request.PrintJob](operationId, requestId)
+      .build[PrintJob](operationId, requestId)
       .request ++ data
 }
