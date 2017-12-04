@@ -25,22 +25,14 @@ object IppSpec extends TestSuite {
   val config = IPPConfig("localhost", port = 6632, queue = "/printers/cups-pdf")
 
   val pA: Future[Response.GetPrinterAttributesResponse] = client.printerAttributes(config)
-  val response: Future[(Short, Map[String, List[IPPValue]])] = for {
-    r <- pA
-  } yield (r.version, r.attributes)
-
   val pdf = ByteString(Files.readAllBytes(Paths.get("examples/pdf-sample.pdf")))
-  val jA  = client.printJob(pdf, config)
+  val jA: Future[Response.PrintJobResponse] = client.printJob(pdf, config)
 
-  val jobResponse: Future[Response.JobData] = for {
-    r <- jA
-  } yield r.jobData
-
-  Thread.sleep(2000) // TODO what is the normal way of testing futures here?
-
-  http.shutdownAllConnectionPools().onComplete(_ => actorSystem.terminate())
 
   override def tests = Tests {
+    val response: Future[(Short, Map[String, List[IPPValue]])] = for {
+      r <- pA
+    } yield (r.version, r.attributes)
     'versionTest - {
       response.map(_._1 ==> 2)
     }
@@ -48,7 +40,14 @@ object IppSpec extends TestSuite {
       response.map(_._2("natural-language-configured").head.asInstanceOf[TextVal].value ==> "en-us")
     }
     'printJobTest - {
+      val jobResponse: Future[Response.JobData] = for {
+        r <- jA
+      } yield r.jobData
       jobResponse.map(_.jobState ==> 3) // processing
     }
+  }
+
+  override def utestAfterAll(): Unit = {
+    http.shutdownAllConnectionPools().onComplete(_ => actorSystem.terminate())
   }
 }
