@@ -32,8 +32,8 @@ object IppSpec extends TestSuite {
   val config = IPPConfig("localhost", port = 6632, queue = "/printers/cups-pdf")
 
   val pA: Future[Response.GetPrinterAttributesResponse] = client.printerAttributes(config)
-  val pdf = ByteString(Files.readAllBytes(Paths.get("examples/pdf-sample.pdf")))
-  val jA: Future[Response.PrintJobResponse] = client.printJob(pdf, config)
+  val pdf                                               = ByteString(Files.readAllBytes(Paths.get("examples/pdf-sample.pdf")))
+  val jA: Future[Response.PrintJobResponse]             = client.printJob(pdf, config)
 
   val pdfParser: PDFParser = new PDFParser
 
@@ -54,31 +54,34 @@ object IppSpec extends TestSuite {
       jobResponse.map(_.jobState ==> 3) // processing
     }
     'comparePDFs - {
-      val jobId = Await.result(jobResponse, Duration.Inf).jobID
+      val jobId   = Await.result(jobResponse, Duration.Inf).jobID
       val jobDone = Await.result(client.poll(jobId, config), Duration.Inf)
-      s"docker cp cups:/var/spool/cups-pdf/ANONYMOUS/ault__0-job_${jobDone.jobID}.pdf /tmp".!
+      if (jobDone.jobState == 9) {
+        s"docker cp cups:/var/spool/cups-pdf/ANONYMOUS/ault__0-job_${jobDone.jobID}.pdf /tmp".!
 
-      val stream = new FileInputStream(s"/tmp/ault__0-job_${jobDone.jobID}.pdf")
-      val metadata: Metadata = new Metadata
-      val context: ParseContext = new ParseContext
-      val handler: BodyContentHandler = new BodyContentHandler
-      pdfParser.parse(stream, handler, metadata, context)
-      val content = handler.toString
-      stream.close()
+        val stream                      = new FileInputStream(s"/tmp/ault__0-job_${jobDone.jobID}.pdf")
+        val metadata: Metadata          = new Metadata
+        val context: ParseContext       = new ParseContext
+        val handler: BodyContentHandler = new BodyContentHandler
+        pdfParser.parse(stream, handler, metadata, context)
+        val content = handler.toString
+        stream.close()
 
-      val streamLocal = new FileInputStream("examples/pdf-sample.pdf")
-      val mdLocal = new Metadata
-      val contextLocal = new ParseContext
-      val handlerLocal = new BodyContentHandler
-      pdfParser.parse(streamLocal,handlerLocal, mdLocal,contextLocal)
-      val content2 = handlerLocal.toString
-      streamLocal.close()
-      val _ = s"rm /tmp/ault__0-job_${jobDone.jobID}.pdf".!
-      content ==> content2
+        val streamLocal  = new FileInputStream("examples/pdf-sample.pdf")
+        val mdLocal      = new Metadata
+        val contextLocal = new ParseContext
+        val handlerLocal = new BodyContentHandler
+        pdfParser.parse(streamLocal, handlerLocal, mdLocal, contextLocal)
+        val contentLocal = handlerLocal.toString
+        streamLocal.close()
+        val _ = s"rm /tmp/ault__0-job_${jobDone.jobID}.pdf".!
+        content ==> contentLocal
+      } else {
+        false
+      }
     }
   }
 
-  override def utestAfterAll(): Unit = {
+  override def utestAfterAll(): Unit =
     http.shutdownAllConnectionPools().onComplete(_ => actorSystem.terminate())
-  }
 }

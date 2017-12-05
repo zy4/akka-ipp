@@ -10,7 +10,7 @@ before_install:
   - sh src/test/docker-cups-pdf/build.sh
   - sh src/test/docker-cups-pdf/run.sh
 script:
-  - sbt test
+  - sbt test:compile test
 jdk:
   - oraclejdk8
 cache:
