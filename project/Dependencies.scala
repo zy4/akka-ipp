@@ -6,6 +6,7 @@ object Dependencies {
   val uTestV    = "0.6.0"
   val akkaV     = "2.5.7"
   val slf4jV    = "1.7.25"
+  val tikaV     = "1.16"
 
   lazy val commonDeps =
     Seq(
@@ -17,7 +18,9 @@ object Dependencies {
       "com.typesafe.akka" %% "akka-http-testkit"   % akkaHttpV % Test,
       "com.typesafe.akka" %% "akka-stream-testkit" % akkaV % Test,
       "org.slf4j"         % "slf4j-api"            % slf4jV,
-      "org.slf4j"         % "slf4j-simple"         % slf4jV
+      "org.slf4j"         % "slf4j-simple"         % slf4jV,
+      "org.apache.tika"   % "tika-core"            % tikaV % Test,
+      "org.apache.tika"   % "tika-parsers"         % tikaV % Test
     )
 
 }
