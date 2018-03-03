@@ -77,7 +77,7 @@ object IppSpec extends TestSuite {
         val _ = s"rm /tmp/ault__0-job_${jobDone.jobID}.pdf".!
         content ==> contentLocal
       } else {
-        false
+        assert(false)
       }
     }
   }
