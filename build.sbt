@@ -4,8 +4,8 @@ updateOptions := updateOptions.value.withGigahorse(false)
 
 name := "akka-ipp"
 organization := "de.envisia.ipp"
-scalaVersion := "2.12.4"
-crossScalaVersions := Seq("2.12.4", "2.11.11" ,"2.13.0-M2")
+scalaVersion := "2.12.5"
+crossScalaVersions := Seq("2.12.5", "2.11.11" ,"2.13.0-M2")
 testFrameworks += new TestFramework("utest.runner.Framework")
 
 lazy val root = (project in file("."))
