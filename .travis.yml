@@ -4,7 +4,7 @@ services:
   - docker
 scala:
   - 2.11.11
-  - 2.12.4
+  - 2.12.5
 before_install:
   - git submodule update --init --recursive
   - sh src/test/docker-cups-pdf/build.sh
