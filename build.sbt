@@ -3,10 +3,11 @@ import ReleaseTransformations._
 updateOptions := updateOptions.value.withGigahorse(false)
 
 name := "akka-ipp"
-organization := "de.envisia.ipp"
-scalaVersion := "2.12.6"
-crossScalaVersions := Seq("2.12.6", "2.11.11" ,"2.13.0-M2")
+organization in ThisBuild := "de.envisia.ipp"
+scalaVersion in ThisBuild := "2.12.6"
+crossScalaVersions in ThisBuild := Seq("2.12.6", "2.11.11" ,"2.13.0-M2")
 testFrameworks += new TestFramework("utest.runner.Framework")
+sonatypeProfileName := "de.envisia.ipp"
 
 lazy val root = (project in file("."))
   .settings(
@@ -63,7 +64,7 @@ releaseProcess := Seq[ReleaseStep](
   setReleaseVersion, // : ReleaseStep
   commitReleaseVersion, // : ReleaseStep, performs the initial git checks
   tagRelease, // : ReleaseStep
-  releaseStepCommand(s"""sonatypeOpen "$organization" "envisia-ipp-staging""""),
+  releaseStepCommand(s"""sonatypeOpen "de.envisia.ipp" "envisia-ipp-staging""""),
   publishArtifacts, // : ReleaseStep, checks whether `publishTo` is properly set up
   releaseStepCommand("sonatypeRelease"),
   setNextVersion, // : ReleaseStep
