@@ -18,7 +18,7 @@ object Dependencies {
       "com.typesafe.akka" %% "akka-http-testkit"   % akkaHttpV % Test,
       "com.typesafe.akka" %% "akka-stream-testkit" % akkaV % Test,
       "org.slf4j"         % "slf4j-api"            % slf4jV,
-      "org.slf4j"         % "slf4j-simple"         % slf4jV,
+      "org.slf4j"         % "slf4j-simple"         % slf4jV % Test,
       "org.apache.tika"   % "tika-core"            % tikaV % Test,
       "org.apache.tika"   % "tika-parsers"         % tikaV % Test
     )
